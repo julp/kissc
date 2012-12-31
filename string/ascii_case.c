@@ -90,19 +90,19 @@ int ascii_strcasecmp(const char *str1, const char *str2)
 }
 
 int ascii_strcasecmp_l(
-    const char *str1, int32_t str1_len,
-    const char *str2, int32_t str2_len
+    const char *str1, size_t str1_len,
+    const char *str2, size_t str2_len
 ) {
     int c1, c2;
-    const char *end;
+    size_t *min_len;
 
     if (str1 != str2) {
         if (str2_len > str1_len) {
-            end = str2 + str2_len;
+            min_len = str2_len;
         } else {
-            end = str1 + str1_len;
+            min_len = str1_len;
         }
-        while (str1 <= end) {
+        while (min_len--) {
             c1 = ascii_toupper(*(unsigned char *) str1++);
             c2 = ascii_toupper(*(unsigned char *) str2++);
             if (c1 != c2) {
@@ -134,8 +134,8 @@ int ascii_strncasecmp(const char *str1, const char *str2, size_t n)
 }
 
 int ascii_strncasecmp_l(
-    const char *str1, int32_t str1_len,
-    const char *str2, int32_t str2_len,
+    const char *str1, size_t str1_len,
+    const char *str2, size_t str2_len,
     int n
 ) {
     //
