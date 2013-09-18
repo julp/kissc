@@ -94,9 +94,10 @@ int ascii_strcasecmp_l(
     const char *str2, size_t str2_len
 ) {
     int c1, c2;
-    size_t *min_len;
 
     if (str1 != str2) {
+        size_t min_len;
+
         if (str2_len > str1_len) {
             min_len = str2_len;
         } else {
@@ -127,16 +128,38 @@ int ascii_strncasecmp(const char *str1, const char *str2, size_t n)
             c2 = ascii_toupper(*(unsigned char *) str2++);
         } while (c1 == c2 && --n > 0);
 
-        return c1 - c2;
+        return (unsigned char) c1 - (unsigned char) c2;
     }
 
     return 0;
 }
 
+#ifndef MIN
+# define MIN(a, b) \
+    ((a) <= (b) ? (a) : (b))
+#endif /* !MIN */
+
 int ascii_strncasecmp_l(
     const char *str1, size_t str1_len,
     const char *str2, size_t str2_len,
-    int n
+    size_t n
 ) {
-    //
+    int c1, c2;
+
+    if (str1 != str2 && n > 0) {
+        size_t min_len;
+
+        min_len =  MIN(n, MIN(str1_len, str2_len);
+        do {
+            if ('\0' == *str1) {
+                return 0;
+            }
+            c1 = ascii_toupper(*(unsigned char *) str1++);
+            c2 = ascii_toupper(*(unsigned char *) str2++);
+        } while (c1 == c2 && --min_len > 0);
+
+        return (unsigned char) c1 - (unsigned char) c2;
+    }
+
+    return 0;
 }
