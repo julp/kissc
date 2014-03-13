@@ -7,7 +7,7 @@ int strcmp_l(
     if (str1 != str2) {
         size_t min_len;
 
-        if (str2_len > str1_len) {
+        if (str2_len < str1_len) {
             min_len = str2_len;
         } else {
             min_len = str1_len;
