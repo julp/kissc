@@ -4,23 +4,25 @@ project(kissc C)
 
 option(UT "enable unit tests" ON)
 
-include_directories(
-    ${CMAKE_CURRENT_BINARY_DIR}
-    ${CMAKE_CURRENT_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}
-    ${CMAKE_BINARY_DIR}
-)
-
-set(SOURCES string/strcmp_l.c)
+set(SOURCES string/strcmp_l.c string/parsenum.c)
 add_library(kissc SHARED ${SOURCES})
+
+include_directories(
+    ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/string/
+)
 
 if(UT)
     file(GLOB UNITY_SRC unity/*.c)
     add_library(unity SHARED ${UNITY_SRC})
 
-    add_executable(test_strncmp_l unity/unity.c tests/strncmp_l.c)
-    target_link_libraries(test_strncmp_l kissc)
+    add_executable(test_strncmp_l tests/strncmp_l.c) # unity/unity.c
+    target_link_libraries(test_strncmp_l kissc unity)
     add_test("strncmp_l" test_strncmp_l)
+
+    add_executable(test_parsenum tests/parsenum.c) # unity/unity.c
+    target_link_libraries(test_parsenum kissc unity)
+    add_test("parsenum" test_parsenum)
 
     enable_testing()
 endif(UT)
