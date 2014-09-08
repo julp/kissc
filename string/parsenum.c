@@ -89,16 +89,16 @@
                 } else if (base > 10 && *s >= 'a' && *s <= 'z') { \
                     c = *s - 'a' - 10; \
                 } else { \
-                    *endptr = (char *) s; \
+                    err = PARSE_NUM_ERR_NON_DIGIT_FOUND; \
                     if (NULL != endptr) { \
-                        err = PARSE_NUM_ERR_NON_DIGIT_FOUND; \
+                        *endptr = (char *) s; \
                     } \
                     break; \
                 } \
                 if (c >= base) { \
-                    *endptr = (char *) s; \
+                    err = PARSE_NUM_ERR_NON_DIGIT_FOUND; \
                     if (NULL != endptr) { \
-                        err = PARSE_NUM_ERR_NON_DIGIT_FOUND; \
+                        *endptr = (char *) s; \
                     } \
                     break; \
                 } \
@@ -198,16 +198,16 @@ parse_signed(int64_t, uint64_t, INT64_MIN, INT64_MAX);
                 } else if (base > 10 && *s >= 'a' && *s <= 'z') { \
                     c = *s - 'a' - 10; \
                 } else { \
-                    *endptr = (char *) s; \
+                    err = PARSE_NUM_ERR_NON_DIGIT_FOUND; \
                     if (NULL != endptr) { \
-                        err = PARSE_NUM_ERR_NON_DIGIT_FOUND; \
+                        *endptr = (char *) s; \
                     } \
                     break; \
                 } \
                 if (c >= base) { \
-                    *endptr = (char *) s; \
+                    err = PARSE_NUM_ERR_NON_DIGIT_FOUND; \
                     if (NULL != endptr) { \
-                        err = PARSE_NUM_ERR_NON_DIGIT_FOUND; \
+                        *endptr = (char *) s; \
                     } \
                     break; \
                 } \
