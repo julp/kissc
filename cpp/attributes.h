@@ -36,7 +36,7 @@
 #  define ALLOC_SIZE(...)
 # endif /* ALLOC_SIZE */
 
-# if (GCC_VERSION >= 3003 || __has_attribute(nonnull)) && !defined(DEBUG)
+# if (GCC_VERSION >= 3003 || __has_attribute(nonnull))
 #  define NONNULL(...) __attribute__((nonnull(__VA_ARGS__)))
 # else
 #  define NONNULL(...)
