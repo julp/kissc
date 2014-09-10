@@ -51,9 +51,11 @@
  \
         s = nptr; \
         acc = any = 0; \
-        *endptr = NULL; \
         negative = FALSE; \
         err = PARSE_NUM_NO_ERR; \
+        if (NULL != endptr) { \
+            *endptr = NULL; \
+        } \
         if (s < end) { \
             if ('-' == *s) { \
                 ++s; \
@@ -161,8 +163,10 @@ parse_signed(int64_t, uint64_t, INT64_MIN, INT64_MAX);
  \
         s = nptr; \
         acc = any = 0; \
-        *endptr = NULL; \
         negative = FALSE; \
+        if (NULL != endptr) { \
+            *endptr = NULL; \
+        } \
         err = PARSE_NUM_NO_ERR; \
         if (s < end) { \
             if ('-' == *s) { \

@@ -107,7 +107,7 @@ void good_strntoint8_t(void)
     int8_t ret;
     char *endptr, string[] = "23ABC";
 
-    TEST_ASSERT(PARSE_NUM_NO_ERR == strntoint8_t(string, string + 2, &endptr, 10, NULL, NULL, &ret));
+    TEST_ASSERT(PARSE_NUM_NO_ERR == strntoint8_t(string, string + STR_LEN("23"), &endptr, 10, NULL, NULL, &ret));
     TEST_ASSERT(23 == ret);
     TEST_ASSERT(NULL == endptr);
 }
@@ -120,6 +120,24 @@ void good_strtoint8_t(void)
     TEST_ASSERT(PARSE_NUM_NO_ERR == strtoint8_t(string, &endptr, 10, NULL, NULL, &ret));
     TEST_ASSERT(23 == ret);
     TEST_ASSERT(NULL == endptr);
+}
+
+void strntoint8_t_without_endptr(void)
+{
+    int8_t ret;
+    char *endptr, string[] = "23ABC";
+
+    TEST_ASSERT(PARSE_NUM_ERR_NON_DIGIT_FOUND == strntoint8_t(string, string + STR_LEN(string), NULL, 10, NULL, NULL, &ret));
+    TEST_ASSERT(23 == ret);
+}
+
+void strtoint8_t_without_endptr(void)
+{
+    int8_t ret;
+    char *endptr, string[] = "23ABC";
+
+    TEST_ASSERT(PARSE_NUM_ERR_NON_DIGIT_FOUND == strtoint8_t(string, NULL, 10, NULL, NULL, &ret));
+    TEST_ASSERT(23 == ret);
 }
 
 char MessageBuffer[50];
@@ -147,8 +165,10 @@ int main(void)
     Unity.TestFile = __FILE__;
     UnityBegin();
 
-    RUN_TEST(good_strntoint8_t, 110);
-    RUN_TEST(good_strtoint8_t, 120);
+    RUN_TEST(good_strntoint8_t, 105);
+    RUN_TEST(good_strtoint8_t, 115);
+    RUN_TEST(strntoint8_t_without_endptr, 125);
+    RUN_TEST(strtoint8_t_without_endptr, 134);
     fputs("==========\n", stdout);
 #define UT(name, type, string, expected_value, expected_return, base, _min, _max, stopchar) \
     RUN_TEST(test_strtonX_##name##_##type, 0);
