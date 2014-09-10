@@ -20,6 +20,7 @@ void tearDown(void)
     void test_strtonX_##name##_##type(void) { \
         ParseNumError x; \
         char *endptr; \
+        char stopchar; \
         type min, max, *pmin, *pmax, v = 0; \
         char string[STR_SIZE(strval)]; \
         /*char *string;*/ \
@@ -47,17 +48,11 @@ void tearDown(void)
             printf("parse_%s(%s): %d parsed (%d expected)\n", #type, string, v, expected_value); \
         } \
         TEST_ASSERT(v == expected_value); \
-        if (stopoffset < 0) { \
-            TEST_ASSERT(NULL == endptr); \
-        } else { \
-            char stopchar; \
-             \
-            stopchar = string[stopoffset]; \
-            if (*endptr != stopchar) { \
-                printf("parse_%s(%s): stopped on 0x%02X/%c (0x%02X/%c expected)\n", #type, string, *endptr, *endptr, stopchar, stopchar); \
-            } \
-            TEST_ASSERT(endptr - string == stopoffset); \
+        stopchar = string[stopoffset]; \
+        if (*endptr != stopchar) { \
+            printf("parse_%s(%s): stopped on 0x%02X/%c (0x%02X/%c expected)\n", #type, string, *endptr, *endptr, stopchar, stopchar); \
         } \
+        TEST_ASSERT(endptr - string == stopoffset); \
     }
 #include "parsenum-ut.h"
 #undef UT
@@ -66,6 +61,7 @@ void tearDown(void)
     void test_strtoX_##name##_##type(void) { \
         ParseNumError x; \
         char *endptr; \
+        char stopchar; \
         type min, max, *pmin, *pmax, v = 0; \
          \
         pmin = pmax = NULL; \
@@ -87,17 +83,11 @@ void tearDown(void)
             printf("parse_%s(%s): %d parsed (%d expected)\n", #type, string, v, expected_value); \
         } \
         TEST_ASSERT(v == expected_value); \
-        if (stopoffset < 0) { \
-            TEST_ASSERT(NULL == endptr); \
-        } else { \
-            char stopchar; \
-             \
-            stopchar = string[stopoffset]; \
-            if (*endptr != stopchar) { \
-                printf("parse_%s(%s): stopped on 0x%02X/%c (0x%02X/%c expected)\n", #type, string, *endptr, *endptr, stopchar, stopchar); \
-            } \
-            TEST_ASSERT(endptr - string == stopoffset); \
+        stopchar = string[stopoffset]; \
+        if (*endptr != stopchar) { \
+            printf("parse_%s(%s): stopped on 0x%02X/%c (0x%02X/%c expected)\n", #type, string, *endptr, *endptr, stopchar, stopchar); \
         } \
+        TEST_ASSERT(endptr - string == stopoffset); \
     }
 #include "parsenum-ut.h"
 #undef UT
@@ -109,7 +99,7 @@ void good_strntoint8_t(void)
 
     TEST_ASSERT(PARSE_NUM_NO_ERR == strntoint8_t(string, string + STR_LEN("23"), &endptr, 10, NULL, NULL, &ret));
     TEST_ASSERT(23 == ret);
-    TEST_ASSERT(NULL == endptr);
+    TEST_ASSERT('A' == *endptr);
 }
 
 void good_strtoint8_t(void)
@@ -119,7 +109,7 @@ void good_strtoint8_t(void)
 
     TEST_ASSERT(PARSE_NUM_NO_ERR == strtoint8_t(string, &endptr, 10, NULL, NULL, &ret));
     TEST_ASSERT(23 == ret);
-    TEST_ASSERT(NULL == endptr);
+    TEST_ASSERT('\0' == *endptr);
 }
 
 void strntoint8_t_without_endptr(void)
