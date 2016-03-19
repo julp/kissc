@@ -1,3 +1,4 @@
+#include "utils.h"
 
 static const unsigned char lower[] = {
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
@@ -37,19 +38,23 @@ static const unsigned char upper[] = {
     0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF
 }
 
-int ascii_isupper(int c) {
+int ascii_isupper(int c)
+{
     return upper[(unsigned char) c] == (unsigned char) c;
 }
 
-int ascii_toupper(int c) {
+int ascii_toupper(int c)
+{
     return (int) upper[(unsigned char) c];
 }
 
-int ascii_islower(int c) {
+int ascii_islower(int c)
+{
     return lower[(unsigned char) c] == (unsigned char) c;
 }
 
-int ascii_tolower(int c) {
+int ascii_tolower(int c)
+{
     return (int) lower[(unsigned char) c];
 }
 
@@ -134,11 +139,6 @@ int ascii_strncasecmp(const char *str1, const char *str2, size_t n)
     return 0;
 }
 
-#ifndef MIN
-# define MIN(a, b) \
-    ((a) <= (b) ? (a) : (b))
-#endif /* !MIN */
-
 int ascii_strncasecmp_l(
     const char *str1, size_t str1_len,
     const char *str2, size_t str2_len,
@@ -149,7 +149,7 @@ int ascii_strncasecmp_l(
     if (str1 != str2 && n > 0) {
         size_t min_len;
 
-        min_len =  MIN(n, MIN(str1_len, str2_len);
+        min_len =  MIN(n, MIN(str1_len, str2_len));
         do {
             if ('\0' == *str1) {
                 return 0;
@@ -159,6 +159,36 @@ int ascii_strncasecmp_l(
         } while (c1 == c2 && --min_len > 0);
 
         return (unsigned char) c1 - (unsigned char) c2;
+    }
+
+    return 0;
+}
+
+char *ascii_memcasechr(const char *str, int c, size_t n)
+{
+    int uc;
+
+    for (uc = ascii_toupper((unsigned char) c); 0 != n; n--, str++) {
+        if (uc == ascii_toupper(*(const unsigned char *) str)) {
+            return (char *) str;
+        }
+    }
+
+    return NULL;
+}
+
+int ascii_memcasecmp(const char *str1, const char *str2, size_t n)
+{
+    if (str1 != str2) {
+        for (; 0 != n; n--) {
+            int c1, c2;
+
+            c1 = ascii_toupper(*(unsigned char *) str1++);
+            c2 = ascii_toupper(*(unsigned char *) str2++);
+            if (c1 != c2) {
+                return (unsigned char) c1 - (unsigned char) c2;
+            }
+        }
     }
 
     return 0;
