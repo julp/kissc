@@ -1,16 +1,9 @@
+#include <stdbool.h>
 #include <string.h>
 #include <limits.h>
 #include <stdint.h>
 
 #include "parsenum.h"
-
-// TODO: temporary
-#ifndef FALSE
-# define FALSE 0
-#endif /* !FALSE */
-#ifndef TRUE
-# define TRUE 1
-#endif /* !TRUE */
 
 /**
  * - PARSE_NUM_NO_ERR: all characters of the string were consumed to convert it into an integer
@@ -40,13 +33,13 @@
     ParseNumError strnto## type(const char *nptr, const char * const end, char **endptr, int base, type *min, type *max, type *ret) { \
         char c; \
         char ***spp; \
-        int negative; \
+        bool negative; \
         int any, cutlim; \
         ParseNumError err; \
         unsigned_type cutoff, acc; \
  \
         acc = any = 0; \
-        negative = FALSE; \
+        negative = false; \
         err = PARSE_NUM_NO_ERR; \
         if (NULL == endptr) { \
             char **sp; \
@@ -60,9 +53,9 @@
         if (**spp < end) { \
             if ('-' == ***spp) { \
                 ++**spp; \
-                negative = TRUE; \
+                negative = true; \
             } else { \
-                negative = FALSE; \
+                negative = false; \
                 if ('+' == ***spp) { \
                     ++**spp; \
                 } \
@@ -151,13 +144,13 @@ parse_signed(int64_t, uint64_t, INT64_MIN, INT64_MAX);
     ParseNumError strnto## type(const char *nptr, const char * const end, char **endptr, int base, type *min, type *max, type *ret) { \
         char c; \
         char ***spp; \
-        int negative; \
+        bool negative; \
         int any, cutlim; \
         type cutoff, acc; \
         ParseNumError err; \
  \
         acc = any = 0; \
-        negative = FALSE; \
+        negative = false; \
         err = PARSE_NUM_NO_ERR; \
         if (NULL == endptr) { \
             char **sp; \
@@ -171,9 +164,9 @@ parse_signed(int64_t, uint64_t, INT64_MIN, INT64_MAX);
         if (**spp < end) { \
             if ('-' == ***spp) { \
                 ++**spp; \
-                negative = TRUE; \
+                negative = true; \
             } else { \
-                negative = FALSE; \
+                negative = false; \
                 if ('+' == ***spp) { \
                     ++**spp; \
                 } \

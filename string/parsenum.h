@@ -1,6 +1,4 @@
-#ifndef PARSENUM_H
-
-# define PARSENUM_H
+#pragma once
 
 typedef enum {
     PARSE_NUM_NO_ERR               = 0, // ok: no error
@@ -16,7 +14,7 @@ typedef enum {
     PARSE_NUM_ERR_GREATER_THAN_MAX = 10 // value is greater than user specified value
 } ParseNumError;
 
-# define parse_signed(type, unsigned_type, value_type_min, value_type_max) \
+#define parse_signed(type, unsigned_type, value_type_min, value_type_max) \
     ParseNumError strto## type(const char *, char **, int, type *, type *, type *); \
     ParseNumError strnto## type(const char *, const char * const, char **, int, type *, type *, type *)
 
@@ -25,9 +23,9 @@ parse_signed(int16_t, uint16_t, INT16_MIN, INT16_MAX);
 parse_signed(int32_t, uint32_t, INT32_MIN, INT32_MAX);
 parse_signed(int64_t, uint64_t, INT64_MIN, INT64_MAX);
 
-# undef parse_signed
+#undef parse_signed
 
-# define parse_unsigned(type, value_type_max) \
+#define parse_unsigned(type, value_type_max) \
     ParseNumError strto## type(const char *, char **, int, type *, type *, type *); \
     ParseNumError strnto## type(const char *, const char * const, char **, int, type *, type *, type *)
 
@@ -36,6 +34,4 @@ parse_unsigned(uint16_t, UINT16_MAX);
 parse_unsigned(uint32_t, UINT32_MAX);
 parse_unsigned(uint64_t, UINT64_MAX);
 
-# undef parse_unsigned
-
-#endif /* !PARSENUM_H */
+#undef parse_unsigned
