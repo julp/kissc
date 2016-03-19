@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include "utils.h"
 
 int strcmp_l(
     const char *str1, size_t str1_len,
@@ -22,11 +23,6 @@ int strcmp_l(
 
     return str1_len - str2_len;
 }
-
-#ifndef MIN
-# define MIN(a, b) \
-    ((a) <= (b) ? (a) : (b))
-#endif /* !MIN */
 
 int strncmp_l(
     const char *str1, size_t str1_len,
