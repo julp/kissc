@@ -4,11 +4,20 @@ project(kissc C)
 
 option(UT "enable unit tests" ON)
 
-set(SOURCES string/strcmp_l.c string/parsenum.c)
+set(SOURCES
+    iterator/iterator.c
+#     hashtable/hashtable.c
+    dynamic_arrays/darray.c
+    string/strcmp_l.c string/parsenum.c
+)
 add_library(kissc SHARED ${SOURCES})
 
 include_directories(
     ${CMAKE_SOURCE_DIR}
+    ${CMAKE_SOURCE_DIR}/cpp/
+    ${CMAKE_SOURCE_DIR}/dynamic_arrays/
+    ${CMAKE_SOURCE_DIR}/iterator/
+    ${CMAKE_SOURCE_DIR}/hashtable/
     ${CMAKE_SOURCE_DIR}/string/
 )
 
