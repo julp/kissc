@@ -5,22 +5,22 @@ project(kissc C)
 option(UT "enable unit tests" ON)
 
 set(SOURCES
-    unicode/utf8.c
     iterator/iterator.c
 #     hashtable/hashtable.c
     dynamic_arrays/darray.c
+    unicode/utf8.c unicode/nfd.c
     string/strcmp_l.c string/parsenum.c string/strcpy_s.c string/strcat_s.c
 )
 add_library(kissc SHARED ${SOURCES})
 
+add_executable(nfd bin/nfd.c)
+target_link_libraries(nfd kissc)
+
 include_directories(
     ${CMAKE_SOURCE_DIR}
     ${CMAKE_SOURCE_DIR}/cpp/
-    ${CMAKE_SOURCE_DIR}/dynamic_arrays/
-    ${CMAKE_SOURCE_DIR}/iterator/
-    ${CMAKE_SOURCE_DIR}/hashtable/
-    ${CMAKE_SOURCE_DIR}/string/
-    ${CMAKE_SOURCE_DIR}/unicode/
+    ${CMAKE_SOURCE_DIR}/public/
+    ${CMAKE_SOURCE_DIR}/private/
 )
 
 if(UT)
@@ -42,6 +42,14 @@ if(UT)
     add_executable(test_parsenum tests/parsenum.c) # unity/unity.c
     target_link_libraries(test_parsenum kissc unity)
     add_test("parsenum" test_parsenum)
+
+    add_executable(test_nfd tests/nfd.c) # unity/unity.c
+    target_link_libraries(test_nfd kissc)# unity)
+    add_test("nfd" test_nfd)
+
+    add_executable(test_utf8 tests/utf8.c) # unity/unity.c
+    target_link_libraries(test_utf8 kissc)# unity)
+    add_test("utf8" test_utf8)
 
     enable_testing()
 endif(UT)

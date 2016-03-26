@@ -5,7 +5,7 @@
 #include "unity/unity.h"
 
 #include "cpp/utils.h"
-#include "strcat.h"
+#include "strcat_s.h"
 
 void setUp(void)
 {

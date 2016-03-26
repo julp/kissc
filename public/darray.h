@@ -9,6 +9,7 @@ typedef struct {
     size_t length;
     size_t allocated;
     size_t element_size;
+    size_t capacity_increment;
 } DArray;
 
 typedef int (*CmpFuncArg)(const void *, const void *, void *);
@@ -35,7 +36,8 @@ void darray_append_all(DArray *, const void * const, size_t);
 bool darray_at(DArray *, unsigned int, void *);
 void darray_clear(DArray *);
 void darray_destroy(DArray *);
-void darray_init(DArray *, size_t, size_t);
+void darray_init(DArray *, size_t);
+void darray_init_custom(DArray *, size_t, size_t, size_t);
 void darray_insert_all(DArray *, unsigned int, const void * const, size_t);
 size_t darray_length(DArray *);
 bool darray_pop(DArray *, void *);

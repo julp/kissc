@@ -1,27 +1,13 @@
-#include "strcat.h"
-
-#ifdef WITH_STRCAT
-char *strcat(char *to, const char *suffix) /* DEPRECATED */
-{
-    char *w;
-
-    for (w = to; '\0' != *w; w++)
-        ;
-    while ('\0' != (*w++ = *suffix++))
-        ;
-
-    return to;
-}
-#endif /* WITH_STRCAT */
+#include "strcat_s.h"
 
 /**
- * X
+ * Safely append a string to an other one
  *
- * @param to
- * @param to_limit
- * @param suffix
+ * @param to the modified string where to append *suffix*
+ * @param to_limit position right after the last usable byte of *to* (this is to + its size)
+ * @param suffix the string to concatenate to *to*
  *
- * @return X
+ * @return false if the buffer is too small
  */
 bool strcat_sp(char *to, const char * const to_limit, const char *suffix)
 {

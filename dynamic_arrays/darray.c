@@ -11,6 +11,7 @@
 #include "attributes.h"
 #include "utils.h"
 #include "darray.h"
+#include "nearest_power.h"
 
 #define DARRAY_INCREMENT 8
 #define DARRAY_MIN_LENGTH 16U
@@ -21,13 +22,13 @@
 #define LENGTH(/*DArray **/ da, /*size_t*/ count) \
     ((da)->element_size * (count))
 
-static inline void darray_maybe_resize_to(DArray *this, size_t total_length)
+static inline void darray_maybe_resize_to(DArray *da, size_t total_length)
 {
-    assert(NULL != this);
+    assert(NULL != da);
 
-    if (UNEXPECTED(total_length >= this->allocated)) {
-        this->allocated = ((total_length / DARRAY_INCREMENT) + 1) * DARRAY_INCREMENT;
-        this->data = realloc(this->data, this->element_size * this->allocated);
+    if (UNEXPECTED(total_length >= da->allocated)) {
+        da->allocated = ((total_length / da->capacity_increment) + 1) * da->capacity_increment;
+        da->data = realloc(da->data, da->element_size * da->allocated);
     }
 }
 
@@ -36,12 +37,18 @@ static inline void darray_maybe_resize_of(DArray *da, size_t additional_length)
     darray_maybe_resize_to(da, da->length + additional_length);
 }
 
-void darray_init(DArray *da, size_t length, size_t element_size)
+void darray_init_custom(DArray *da, size_t element_size, size_t initial_capacity, size_t capacity_increment)
 {
     da->data = NULL;
     da->length = da->allocated = 0;
     da->element_size = element_size;
-    darray_maybe_resize_to(da, MIN(DARRAY_MIN_LENGTH, length));
+    da->capacity_increment = nearest_power(capacity_increment, 2);
+    darray_maybe_resize_to(da, MIN(DARRAY_MIN_LENGTH, initial_capacity));
+}
+
+void darray_init(DArray *da, size_t element_size)
+{
+    darray_init_custom(da, element_size, DARRAY_MIN_LENGTH, DARRAY_INCREMENT);
 }
 
 void darray_destroy(DArray *da)

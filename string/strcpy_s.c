@@ -1,16 +1,5 @@
 #include "strcpy_s.h"
 
-#ifdef WITH_STRCPY
-char *strcpy(char *to, const char *from) /* DEPRECATED */
-{
-    do {
-        *to++ = *from++;
-    } while ('\0' != *from);
-
-    return to;
-}
-#endif /* WITH_STRCPY */
-
 /**
  * Safely copy a string into a buffer
  *
@@ -18,7 +7,7 @@ char *strcpy(char *to, const char *from) /* DEPRECATED */
  * @param to_limit position right after the last usable byte of *to* (this is to + its size)
  * @param from the input string to copy
  *
- * @return false if the buffer was unsifficient
+ * @return false if the buffer was unsufficient
  *
  * For:
  * \code
