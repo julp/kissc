@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 #include "parsenum.h"
-#include "cpp/utils.h"
+#include "utils.h"
 
 #include "unity/unity.h"
 

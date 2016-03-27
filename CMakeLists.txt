@@ -18,7 +18,6 @@ target_link_libraries(nfd kissc)
 
 include_directories(
     ${CMAKE_SOURCE_DIR}
-    ${CMAKE_SOURCE_DIR}/cpp/
     ${CMAKE_SOURCE_DIR}/public/
     ${CMAKE_SOURCE_DIR}/private/
 )

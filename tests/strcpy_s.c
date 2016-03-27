@@ -4,7 +4,7 @@
 
 #include "unity/unity.h"
 
-#include "cpp/utils.h"
+#include "utils.h"
 #include "strcpy_s.h"
 
 void setUp(void)

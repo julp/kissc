@@ -1,5 +1,5 @@
 #include "utf8.h"
-#include "cpp/utils.h"
+#include "utils.h"
 
 #define U8(c) \
     ((uint8_t) (c))
