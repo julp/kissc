@@ -816,6 +816,12 @@ static void hashtable_iterator_previous(const void *UNUSED(collection), void **s
     *state = ((HashNode *) *state)->gPrev;
 }
 
+/**
+ * Initialize an iterator to loop on the values of an HashTable
+ *
+ * @param it the iterator to initialize
+ * @param ht the hashtable to traverse
+ **/
 void hashtable_to_iterator(Iterator *it, HashTable *ht)
 {
     iterator_init(
