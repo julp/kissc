@@ -54,6 +54,33 @@
 #define LENGTH(/*DArray **/ da, /*size_t*/ count) \
     ((da)->element_size * (count))
 
+// post-deletion
+// NOTE: have to be called AFTER da->length has been decremented
+static inline void darray_wipeout(DArray *da, size_t count)
+{
+//     if (NULL == da->default_value) {
+        bzero(OFFSET_TO_ADDR(da, da->length), LENGTH(da, count));
+//     } else {
+//         size_t i;
+//
+//         for (i = 0; i < count; i++) {
+//             memcpy(OFFSET_TO_ADDR(da, da->length - i), da->default_value, da->element_size);
+//         }
+//     }
+}
+
+// pre-deletion
+static inline void darray_destroy_elements(DArray *da, unsigned int from, size_t count)
+{
+    if (NULL != da->dtor) {
+        size_t i;
+
+        for (i = 0; i < count; i++) {
+            da->dtor((void *) OFFSET_TO_ADDR(da, from + i));
+        }
+    }
+}
+
 static inline void darray_maybe_resize_to(DArray *da, size_t total_length)
 {
     assert(NULL != da);
@@ -61,6 +88,7 @@ static inline void darray_maybe_resize_to(DArray *da, size_t total_length)
     if (UNEXPECTED(total_length >= da->allocated)) {
         da->allocated = ((total_length / da->capacity_increment) + 1) * da->capacity_increment;
         da->data = realloc(da->data, da->element_size * da->allocated);
+        darray_wipeout(da, da->allocated);
     }
 }
 
@@ -77,9 +105,11 @@ static inline void darray_maybe_resize_of(DArray *da, size_t additional_length)
  * @param initial_capacity the initial space to allocate from the start
  * @param capacity_increment the capacity increment for array groths when there is no more space
  **/
-void darray_init_custom(DArray *da, size_t element_size, size_t initial_capacity, size_t capacity_increment)
+void darray_init_custom(DArray *da, DtorFunc dtor, size_t element_size, size_t initial_capacity, size_t capacity_increment)
 {
     da->data = NULL;
+    da->dtor = dtor;
+//     da->default_value = NULL;
     da->length = da->allocated = 0;
     da->element_size = element_size;
     da->capacity_increment = nearest_power(capacity_increment, 2);
@@ -92,9 +122,9 @@ void darray_init_custom(DArray *da, size_t element_size, size_t initial_capacity
  * @param da the dynamic array to initialize
  * @param element_size the size, in bytes, needed to store an element
  **/
-void darray_init(DArray *da, size_t element_size)
+void darray_init(DArray *da, DtorFunc dtor, size_t element_size)
 {
-    darray_init_custom(da, element_size, DARRAY_MIN_LENGTH, DARRAY_INCREMENT);
+    darray_init_custom(da, dtor, element_size, DARRAY_MIN_LENGTH, DARRAY_INCREMENT);
 }
 
 /**
@@ -104,6 +134,7 @@ void darray_init(DArray *da, size_t element_size)
  **/
 void darray_destroy(DArray *da)
 {
+    darray_destroy_elements(da, 0, da->length);
     free(da->data);
     da->data = NULL;
 }
@@ -117,8 +148,9 @@ void darray_destroy(DArray *da)
  **/
 void darray_clear(DArray *da)
 {
+    darray_destroy_elements(da, 0, da->length);
+    darray_wipeout(da, da->length);
     da->length = 0;
-    bzero(da->data, da->allocated);
 }
 
 /**
@@ -153,10 +185,12 @@ bool darray_at(DArray *da, unsigned int offset, void *value)
 bool darray_shift(DArray *da, void *value)
 {
     if (da->length > 0) {
+        darray_destroy_elements(da, 0, 1);
         memcpy(value, OFFSET_TO_ADDR(da, 0), LENGTH(da, 1));
         if (--da->length > 0) {
             memmove(OFFSET_TO_ADDR(da, 0), OFFSET_TO_ADDR(da, 1), LENGTH(da, da->length));
         }
+        darray_wipeout(da, 1);
         return true;
     } else {
         return false;
@@ -174,7 +208,9 @@ bool darray_shift(DArray *da, void *value)
 bool darray_pop(DArray *da, void *value)
 {
     if (da->length > 0) {
+        darray_destroy_elements(da, da->length/* XXX: -1 ? */, 1);
         memcpy(value, OFFSET_TO_ADDR(da, --da->length), LENGTH(da, 1));
+        darray_wipeout(da, 1);
         return true;
     } else {
         return false;
@@ -245,8 +281,10 @@ void darray_insert_all(DArray *da, unsigned int offset, const void * const data,
 bool darray_remove_at(DArray *da, unsigned int offset)
 {
     if (offset < da->length) {
+        darray_destroy_elements(da, offset, 1);
         memmove(OFFSET_TO_ADDR(da, offset), OFFSET_TO_ADDR(da, offset + 1), LENGTH(da, da->length - offset - 1));
         da->length--;
+        darray_wipeout(da, 1);
         return true;
     } else {
         return false;
@@ -270,8 +308,10 @@ void darray_remove_range(DArray *da, unsigned int from, unsigned int to)
     assert(from <= to);
 
     diff = to - from + 1;
+    darray_destroy_elements(da, from, diff);
     memmove(OFFSET_TO_ADDR(da, to + 1), OFFSET_TO_ADDR(da, from), LENGTH(da, da->length - diff));
     da->length -= diff;
+    darray_wipeout(da, diff);
 }
 
 /**
@@ -311,7 +351,12 @@ void darray_swap(DArray *da, unsigned int offset1, unsigned int offset2)
 void darray_set_size(DArray *da, size_t length)
 {
     if (length < da->length) {
+        size_t diff;
+
+        diff = da->length - length;
+        darray_destroy_elements(da, length, diff);
         da->length = length;
+        darray_wipeout(da, diff);
     } else {
         darray_maybe_resize_to(da, length);
     }

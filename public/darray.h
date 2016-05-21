@@ -4,11 +4,18 @@
 #include <stddef.h> /* size_t */
 #include <stdint.h> /* uint\d+_t */
 
+#ifndef DTOR_FUNC
+# define DTOR_FUNC
+typedef void (*DtorFunc)(void *);
+#endif /* !DOTR_FUNC */
+
 typedef struct {
     uint8_t *data;
+    DtorFunc dtor;
     size_t length;
     size_t allocated;
     size_t element_size;
+//     uint8_t *default_value;
     size_t capacity_increment;
 } DArray;
 
@@ -36,8 +43,8 @@ void darray_append_all(DArray *, const void * const, size_t);
 bool darray_at(DArray *, unsigned int, void *);
 void darray_clear(DArray *);
 void darray_destroy(DArray *);
-void darray_init(DArray *, size_t);
-void darray_init_custom(DArray *, size_t, size_t, size_t);
+void darray_init(DArray *, DtorFunc, size_t);
+void darray_init_custom(DArray *, DtorFunc, size_t, size_t, size_t);
 void darray_insert_all(DArray *, unsigned int, const void * const, size_t);
 size_t darray_length(DArray *);
 bool darray_pop(DArray *, void *);

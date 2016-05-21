@@ -32,6 +32,18 @@
 # define WARN_UNUSED_RESULT
 #endif /* WARN_UNUSED_RESULT */
 
+#if GCC_VERSION >= 2004 || __has_attribute(const)
+# define CONST __attribute__((const))
+#else
+# define CONST
+#endif /* CONST */
+
+#if GCC_VERSION >= 2004 || __has_attribute(pure)
+# define PURE __attribute__((pure))
+#else
+# define PURE
+#endif /* PURE */
+
 #if GCC_VERSION >= 2096 || __has_attribute(malloc)
 # define MALLOC __attribute__((malloc))
 #else

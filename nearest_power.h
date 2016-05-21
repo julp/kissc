@@ -4,7 +4,7 @@
 
 #define HALF_SIZE (1UL << (sizeof(size_t) * CHAR_BIT - 1))
 
-static inline size_t nearest_power(size_t requested_length, size_t minimal)
+static inline CONST size_t nearest_power(size_t requested_length, size_t minimal)
 {
     if (requested_length > HALF_SIZE) {
         return HALF_SIZE;
