@@ -19,7 +19,17 @@ typedef struct {
     size_t capacity_increment;
 } DArray;
 
-typedef int (*CmpFuncArg)(const void *, const void *, void *);
+#include <sys/param.h>
+#ifdef BSD
+# define QSORT_R(base, nmemb, size, compar, thunk) \
+    qsort_r(base, nmemb, size, thunk, compar)
+# define QSORT_CB_ARGS(a, b, data) data, a, b
+#else
+# define QSORT_R(base, nmemb, size, compar, thunk) \
+    qsort_r(base, nmemb, size, compar, thunk)
+# define QSORT_CB_ARGS(a, b, data) a, b, data
+#endif /* BSD */
+typedef int (*CmpFuncArg)(QSORT_CB_ARGS(const void *, const void *, void *));
 
 #define darray_prepend(/*DArray **/ da, ptr) \
     darray_prepend((da), (ptr), 1)

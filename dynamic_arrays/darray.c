@@ -39,6 +39,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <sys/param.h> /* BSD */
 
 #include "attributes.h"
 #include "utils.h"
@@ -387,13 +388,7 @@ void darray_sort(DArray *da, CmpFuncArg cmpfn, void *arg)
     assert(NULL != da);
     assert(NULL != cmpfn);
 
-    qsort_r(da->data, da->length, da->element_size,
-#ifdef BSD
-        arg, cmpfn
-#else
-        cmpfn, arg
-#endif
-    );
+    QSORT_R(da->data, da->length, da->element_size, cmpfn, arg);
 }
 
 #ifndef WITHOUT_ITERATOR
