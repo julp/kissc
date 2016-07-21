@@ -465,6 +465,8 @@ static void darray_iterator_previous(const void *collection, void **state)
  *
  * @param it the iterator to initialize
  * @param da the dynamic array to traverse
+ *
+ * @note iterator directions: forward and backward
  **/
 void darray_to_iterator(Iterator *it, DArray *da)
 {

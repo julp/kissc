@@ -821,6 +821,8 @@ static void hashtable_iterator_previous(const void *UNUSED(collection), void **s
  *
  * @param it the iterator to initialize
  * @param ht the hashtable to traverse
+ *
+ * @note iterator directions: forward and backward
  **/
 void hashtable_to_iterator(Iterator *it, HashTable *ht)
 {
