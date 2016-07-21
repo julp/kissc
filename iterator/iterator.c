@@ -1,5 +1,5 @@
 /**
- * @file lib/iterator.c
+ * @file iterator/iterator.c
  * @brief An iterator is an abstraction layer to easily traverse a collection of (read only) items.
  *
  * This is simple as this:

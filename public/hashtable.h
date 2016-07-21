@@ -75,6 +75,10 @@ void *hashtable_first(HashTable *);
 void *hashtable_last(HashTable *);
 HashNode *hashtable_delete_node(HashTable *, HashNode *);
 
+bool hashtable_equals(HashTable *, HashTable *);
+HashTable *hashtable_copy(HashTable *, HashTable *, DupFunc, DupFunc);
+HashTable *hashtable_union(HashTable *, HashTable *, HashTable *, DupFunc, DupFunc);
+
 #define hashtable_hash(ht, k) \
     _hashtable_hash(ht, (ht_key_t) k)
 

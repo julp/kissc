@@ -1,5 +1,5 @@
 /**
- * @file hashtable.c
+ * @file hashtable/hashtable.c
  * @brief an hashtable implementation
  */
 
@@ -765,6 +765,32 @@ HashTable *hashtable_union(HashTable *dst, HashTable *set1, HashTable *set2, Dup
     }
 
     return ret;
+}
+
+/**
+ * Compare two hashtables
+ *
+ * @param ht1 the first hashtable
+ * @param ht2 the second hashtable
+ *
+ * @return true if both hashtables contain the same pairs of key/value
+ */
+bool hashtable_equals(HashTable *ht1, HashTable *ht2)
+{
+    bool equals;
+    HashNode *n;
+
+    assert(ht1->ef == ht2->ef);
+    equals = ht1->count == ht2->count;
+    for (n = ht1->gHead; equals && NULL != n; n = n->gNext) {
+        ht_key_t data;
+
+        if ((equals = hashtable_quick_get(ht2, n->hash, n->key, &data))) {
+            equals = ht1->ef((ht_key_t) n->data, data);
+        }
+    }
+
+    return equals;
 }
 
 #ifndef WITHOUT_ITERATOR

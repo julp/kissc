@@ -1,5 +1,5 @@
 /**
- * @file darray.c
+ * @file dynamic_arrays/darray.c
  * @brief dynamic array of elements of any size (but all elements have to be of the same size)
  *
  * Example to store integers:
@@ -39,7 +39,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <sys/param.h> /* BSD */
 
 #include "attributes.h"
 #include "utils.h"
