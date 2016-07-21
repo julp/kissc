@@ -426,16 +426,20 @@ static bool darray_iterator_is_valid(const void *collection, void **state)
     return *((uint8_t **) state) >= ary->data && *((uint8_t **) state) < (ary->data + LENGTH(ary, ary->length));
 }
 
-static void darray_iterator_current(const void *collection, void **state, void **value)
+static void darray_iterator_current(const void *collection, void **state, void **key, void **value)
 {
     DArray *ary;
 
     assert(NULL != collection);
     assert(NULL != state);
-    assert(NULL != value);
 
     ary = (DArray *) collection;
-    *value = *(uint8_t **) state;
+    if (NULL != value) {
+        *value = *(uint8_t **) state;
+    }
+    if (NULL != key) {
+        *((uint64_t *) key) = *((uint8_t **) state) - ary->data;
+    }
 }
 
 static void darray_iterator_next(const void *collection, void **state)
@@ -467,6 +471,7 @@ static void darray_iterator_previous(const void *collection, void **state)
  * @param da the dynamic array to traverse
  *
  * @note iterator directions: forward and backward
+ * @note keys (element's index) are typed as uint64_t
  **/
 void darray_to_iterator(Iterator *it, DArray *da)
 {

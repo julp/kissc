@@ -1,18 +1,16 @@
 /**
- * @file iterator.c
+ * @file lib/iterator.c
  * @brief An iterator is an abstraction layer to easily traverse a collection of (read only) items.
  *
  * This is simple as this:
  * \code
  *   Iterator it;
+ *   const MyItem *item;
  *
  *   // initialize the iterator
  *   my_collection_to_iterator(&it);
  *   // traverse it (forward order here)
- *   for (iterator_first(&it); iterator_is_valid(&it); iterator_next(&it)) {
- *       const MyItem *item;
- *
- *       item = (const MyItem *) iterator_current(&it);
+ *   for (iterator_first(&it); iterator_is_valid(&it, NULL, &item); iterator_next(&it)) {
  *       // use item
  *   }
  *   // we're done, "close" the iterator
@@ -22,19 +20,17 @@
  * You can even known if your collection is empty by writing:
  * \code
  *   Iterator it;
+ *   const MyItem *item;
  *
  *   // initialize the iterator
  *   my_collection_to_iterator(&it);
  *   iterator_first(&it);
- *   if (iterator_is_valid(&it)) {
+ *   if (iterator_is_valid(&it, NULL, &item)) {
  *       // collection is not empty, "normal" traversal
  *       do {
- *           const MyItem *item;
- *
- *           item = (const MyItem *) iterator_current(&it);
  *           // use item
  *           iterator_next(&it); // have to be the last instruction of the loop
- *       } while (iterator_is_valid(&it));
+ *       } while (iterator_is_valid(&it, NULL, &item));
  *   } else {
  *       // collection is empty
  *   }
@@ -45,6 +41,8 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdint.h>
+#include <string.h>
 
 #include "attributes.h"
 #include "iterator.h"
@@ -106,21 +104,6 @@ void iterator_close(Iterator *it)
     *it = NULL_ITERATOR;
 }
 
-/**
- * Get the current value
- *
- * @param it the iterator
- */
-void *iterator_current(Iterator *it)
-{
-    void *value = NULL;
-
-    if (NULL != it->current) {
-        it->current(it->collection, &it->state, &value);
-    }
-
-    return value;
-}
 
 /**
  * (Re)set internal position to the first element (if supported)
@@ -177,10 +160,131 @@ void iterator_previous(Iterator *it)
  * you are done
  *
  * @param it the iterator
+ * @param key the associated to the current element, if any
+ * @param value the current element
  */
-bool iterator_is_valid(Iterator *it)
+bool _iterator_is_valid(Iterator *it, void **key, void **value)
 {
-    return it->valid(it->collection, &it->state);
+    bool valid;
+
+    if ((valid = it->valid(it->collection, &it->state))) {
+        it->current(it->collection, &it->state, key, value);
+    }
+
+    return valid;
+}
+
+#define CHAR_P(p) \
+    ((const char *) (p))
+
+/* ========== array ========== */
+
+typedef struct {
+    const char *ptr;
+    size_t element_size;
+    size_t element_count;
+} as_t /*array_state*/;
+
+static void array_iterator_first(const void *collection, void **state)
+{
+    as_t *s;
+
+    assert(NULL != collection);
+    assert(NULL != state);
+    assert(NULL != *state);
+
+    s = (as_t *) *state;
+    s->ptr = collection;
+}
+
+static void array_iterator_last(const void *collection, void **state)
+{
+    as_t *s;
+
+    assert(NULL != collection);
+    assert(NULL != state);
+    assert(NULL != *state);
+
+    s = (as_t *) *state;
+    s->ptr = collection + (s->element_count - 1) * s->element_size;
+}
+
+static bool array_iterator_is_valid(const void *collection, void **state)
+{
+    as_t *s;
+
+    assert(NULL != state);
+    assert(NULL != *state);
+
+    s = (as_t *) *state;
+
+    return s->ptr >= CHAR_P(collection) && s->ptr < CHAR_P(collection) + s->element_count * s->element_size;
+}
+
+static void array_iterator_current(const void *collection, void **state, void **key, void **value)
+{
+    as_t *s;
+
+    assert(NULL != state);
+    assert(NULL != value);
+
+    s = (as_t *) *state;
+    if (NULL != value) {
+        memcpy((char *) value, s->ptr, s->element_size);
+    }
+    if (NULL != key) {
+        *((uint64_t *) key) = (s->ptr - CHAR_P(collection)) / s->element_size;
+    }
+}
+
+static void array_iterator_next(const void *UNUSED(collection), void **state)
+{
+    as_t *s;
+
+    assert(NULL != state);
+    assert(NULL != *state);
+
+    s = (as_t *) *state;
+    s->ptr += s->element_size;
+}
+
+static void array_iterator_prev(const void *UNUSED(collection), void **state)
+{
+    as_t *s;
+
+    assert(NULL != state);
+    assert(NULL != *state);
+
+    s = (as_t *) *state;
+    s->ptr -= s->element_size;
+}
+
+/**
+ * Iterate on an array of struct (or union) where one of its field is sentineled
+ * by a NULL pointer.
+ *
+ * @param it the iterator to initialize
+ * @param array the array to iterate on
+ * @param element_size the size of an element of this array
+ * @param element_count the number of elements in the array
+ */
+void array_to_iterator(Iterator *it, void *array, size_t element_size, size_t element_count)
+{
+    as_t *s;
+
+    s = malloc(sizeof(*s));
+    s->ptr = CHAR_P(array);
+    s->element_size = element_size;
+    s->element_count = element_count;
+
+    iterator_init(
+        it, array, s,
+        array_iterator_first, array_iterator_last,
+        array_iterator_current,
+        array_iterator_next, array_iterator_prev,
+        array_iterator_is_valid,
+        free
+    );
 }
 
 /* ========== NULL terminated (pointers) array ========== */
@@ -200,13 +304,17 @@ static bool null_terminated_ptr_array_iterator_is_valid(const void *UNUSED(colle
     return NULL != **((void ***) state);
 }
 
-static void null_terminated_ptr_array_iterator_current(const void *collection, void **state, void **value)
+static void null_terminated_ptr_array_iterator_current(const void *collection, void **state, void **key, void **value)
 {
     assert(NULL != collection);
     assert(NULL != state);
-    assert(NULL != value);
 
-    *value = **(void ***) state;
+    if (NULL != value) {
+        *value = **(void ***) state;
+    }
+    if (NULL != key) {
+        *((uint64_t *) key) = *state - collection;
+    }
 }
 
 static void null_terminated_ptr_array_iterator_next(const void *UNUSED(collection), void **state)
@@ -270,16 +378,20 @@ static bool null_sentineled_field_terminated_array_iterator_is_valid(const void 
     return NULL != *((char **) (s->ptr + s->field_offset));
 }
 
-static void null_sentineled_field_terminated_array_iterator_current(const void *UNUSED(collection), void **state, void **value)
+static void null_sentineled_field_terminated_array_iterator_current(const void *collection, void **state, void **key, void **value)
 {
     nsftas_t *s;
 
     assert(NULL != state);
     assert(NULL != value);
-    assert(NULL != *state);
 
     s = (nsftas_t *) *state;
-    *value = (void *) s->ptr;
+    if (NULL != value) {
+        *value = (void *) s->ptr;
+    }
+    if (NULL != key) {
+        *((uint64_t *) key) = (s->ptr - CHAR_P(collection)) / s->element_size;
+    }
 }
 
 static void null_sentineled_field_terminated_array_iterator_next(const void *UNUSED(collection), void **state)
@@ -308,7 +420,7 @@ void null_sentineled_field_terminated_array_to_iterator(Iterator *it, void *arra
     nsftas_t *s;
 
     s = malloc(sizeof(*s));
-    s->ptr = (const char *) array;
+    s->ptr = CHAR_P(array);
     s->element_size = element_size;
     s->field_offset = field_offset;
 
