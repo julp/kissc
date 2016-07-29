@@ -6,6 +6,7 @@ option(UT "enable unit tests" ON)
 
 set(SOURCES
     iterator/iterator.c
+    rbtree/rbtree.c
 #     hashtable/hashtable.c
     dynamic_arrays/darray.c
     unicode/utf8.c unicode/nfd.c

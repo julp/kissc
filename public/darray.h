@@ -4,10 +4,7 @@
 #include <stddef.h> /* size_t */
 #include <stdint.h> /* uint\d+_t */
 
-#ifndef DTOR_FUNC
-# define DTOR_FUNC
-typedef void (*DtorFunc)(void *);
-#endif /* !DOTR_FUNC */
+#include "defs.h"
 
 typedef struct {
     uint8_t *data;
