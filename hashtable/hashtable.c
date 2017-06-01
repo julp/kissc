@@ -102,7 +102,7 @@ static inline void hashtable_maybe_resize(HashTable *ht)
         return;
     }
     if (EXPECTED(ht->capacity << 1) > 0) {
-        ht->nodes = mem_renew(ht->nodes, *ht->nodes, ht->capacity << 1);
+        ht->nodes = realloc(ht->nodes, sizeof(*ht->nodes) * (ht->capacity << 1));
         ht->capacity <<= 1;
         ht->mask = ht->capacity - 1;
         hashtable_rehash(ht);
@@ -143,7 +143,7 @@ void hashtable_init(
     ht->key_duper = key_duper;
     ht->key_dtor = key_dtor;
     ht->value_dtor = value_dtor;
-    ht->nodes = mem_new_n(*ht->nodes, ht->capacity);
+    ht->nodes = malloc(sizeof(*ht->nodes) * ht->capacity);
     memset(ht->nodes, 0, ht->capacity * sizeof(*ht->nodes));
 }
 
@@ -240,7 +240,7 @@ static bool hashtable_put_real(HashTable *ht, uint32_t flags, ht_hash_t h, ht_ke
         }
         n = n->nNext;
     }
-    n = mem_new(*n);
+    n = malloc(sizeof(*n));
     if (NULL == ht->key_duper) {
         n->key = key;
     } else {
