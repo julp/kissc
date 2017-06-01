@@ -8,5 +8,5 @@
 #define UTF8_MAX_CU_LENGTH 8
 
 bool utf8_check(const char *, size_t, const char **);
-size_t utf8_read_cp(const uint8_t *, size_t, codepoint *);
-size_t utf8_write_cp(codepoint, uint8_t *, size_t);
+size_t utf8_read_cp(const uint8_t *, const uint8_t * const, codepoint *);
+size_t utf8_write_cp(codepoint, uint8_t *, const uint8_t * const);

@@ -90,14 +90,15 @@ enum {
     UTF8_FIRST_BYTE,
     UTF8_LAST_BYTE,
     UTF8_BEFORE_LAST_BYTE,
-    UTF8_4_2,
-//     UTF8_1_0 = UTF8_FIRST_BYTE,
-//     UTF8_2_0 = UTF8_FIRST_BYTE,
-//     UTF8_3_0 = UTF8_FIRST_BYTE,
-//     UTF8_4_0 = UTF8_FIRST_BYTE,
+    // NOTE: UTF8_X_Y means the Yth byte of a code point encoded on X bytes long
+//     UTF8_1_1 = UTF8_FIRST_BYTE,
+//     UTF8_2_1 = UTF8_FIRST_BYTE,
+//     UTF8_3_1 = UTF8_FIRST_BYTE,
+//     UTF8_4_1 = UTF8_FIRST_BYTE,
 //     UTF8_2_2 = UTF8_LAST_BYTE,
 //     UTF8_3_2 = UTF8_BEFORE_LAST_BYTE,
 //     UTF8_3_3 = UTF8_LAST_BYTE,
+    UTF8_4_2,
 //     UTF8_4_3 = UTF8_BEFORE_LAST_BYTE,
 //     UTF8_4_4 = UTF8_LAST_BYTE,
 };
@@ -211,10 +212,10 @@ bool utf8_check(const char *string, size_t string_len, const char **errp)
 {
     int state;
     const uint8_t *s;
-    const uint8_t * const end = (const uint8_t *) string + string_len;
+    const uint8_t * const string_end = (const uint8_t *) string + string_len;
 
-    state = S(OK); // accept empty string
-    for (s = (const uint8_t *) string; S(__) != state && s < end; s++) {
+    state = S(OK); // accept an empty string
+    for (s = (const uint8_t *) string; S(__) != state && s < string_end; s++) {
         state = state_transition_table[state][*s];
     }
     if (NULL != errp) {
@@ -226,7 +227,7 @@ bool utf8_check(const char *string, size_t string_len, const char **errp)
     }
 #if 0
     if (S(OK) != state) {
-        if (S(__) != state && s == end) {
+        if (S(__) != state && s == string_end) {
             return TRUNCATED;
         } else {
             return INVALID;
@@ -239,12 +240,25 @@ bool utf8_check(const char *string, size_t string_len, const char **errp)
 #endif
 }
 
+/**
+ * Read next code point (if any) from a UTF-8 string
+ *
+ * @param string the string
+ * @param string_end a pointer right after the end of string ('\0' excluded - point on it if the string is 0-terminated)
+ * @param cp where to put the extracted code point
+ *
+ * @return the amount of bytes consumed to read the codepoint
+ */
 // TODO: check for truncated code point (if so, set *cp to U+FFFD)
-size_t utf8_read_cp(const uint8_t *string, size_t string_len, codepoint *cp)
+size_t utf8_read_cp(const uint8_t *string, const uint8_t * const string_end, codepoint *cp)
 {
     const uint8_t *r;
 
     r = (uint8_t *) string;
+    if ((string_end - string) < utf8_count_bytes[*r]) { // TODO: utf8_count_bytes[*r] == I or R (< 0)
+        *cp = UNICODE_REPLACEMENT_CHARACTER;
+        return -1; // TODO: -1 vs size_t
+    }
 #ifdef PRECOMPUTED
     *cp = cumask[UTF8_FIRST_BYTE][*r++];
     if (*cp > 0x7F) {
@@ -291,29 +305,60 @@ size_t utf8_read_cp(const uint8_t *string, size_t string_len, codepoint *cp)
     return r - string;
 }
 
+/**
+ * Find the Nth code points of a UTF-8 string
+ *
+ * @param string the string to traverse
+ * @param string_end the end of the string (a pointer right after its last byte, '\0', if nul-terminated, excluded)
+ * @param nth the numbe of the code points to look for
+ *
+ * @return NULL if out of bounds or the address of the nth codepoints
+ *
+ * @note if you look for for several codepoints, it is more insteresting to do so gradualy instead of restarting from
+ * the beginning of string each time. For example, if you want the 2nd, 7th and 10th codepoints, use the result of the
+ * first search (the 2nd codepoint) for the second search (7th codepoint) then the second search (7th codepoint) for
+ * the third (10th codepoint).
+ *
+ * @note this function is not "safe", code points are not checked. Use it only on trusted or checked first strings.
+ */
+/*const */uint8_t *utf8_nth_cp_nocheck(uint8_t *string, const uint8_t * const string_end, size_t nth)
+{
+    /*const */uint8_t *r = string;
+
+    for (; 0 != nth && r < string_end; --nth) {
+        r += utf8_count_bytes[*r]; // TODO: utf8_count_bytes can be negative
+    }
+
+    return 0 == nth ? r : NULL;
+}
+
 // TODO: buffer overflow
-size_t utf8_write_cp(codepoint cp, uint8_t *string, size_t string_size)
+size_t utf8_write_cp(codepoint cp, uint8_t *buffer, const uint8_t * const buffer_end)
 {
     uint8_t *w;
 
-    w = string;
+    w = buffer;
     if (U32(cp) <= 0x7F) {
         // [0;0x7F]
         // 0xxx xxxx
+        // TODO: assert(buffer_end - buffer >= 1);
         *w++ = U8(cp);
     } else {
         if (U32(cp) <= 0x7FF) {
             // [0x80;0x7FF]
             // 110x xxxx (10xx xxxx)
+            // TODO: assert(buffer_end - buffer >= 2);
             *w++ = U8((cp >> 6) | 0b11000000);
         } else {
             if (U32(cp) <= 0xFFFF) {
                 // [0x800;0xFFFF]
                 // 1110 xxxx (10xx xxxx 10xx xxxx)
+                // TODO: assert(buffer_end - buffer >= 3);
                 *w++ = U8((cp >> 12) | 0b11100000);
             } else {
                 // [0x10000;0x10FFFF]
                 // 1111 0xxx 10xx xxxx (10xx xxxx 10xx xxxx)
+                // TODO: assert(buffer_end - buffer >= 4);
                 *w++ = U8((cp >> 18) | 0b11110000);
                 *w++ = U8(((cp >> 12) & 0b00111111) | 0b10000000);
             }
@@ -322,5 +367,5 @@ size_t utf8_write_cp(codepoint cp, uint8_t *string, size_t string_size)
         *w++ = U8((cp & 0b00111111) | 0b10000000);
     }
 
-    return w - string;
+    return w - buffer;
 }
