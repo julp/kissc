@@ -29,9 +29,9 @@ void tearDown(void)
         char buffer[input_len]; \
  \
         *buffer = 'A'; \
-        printf("%zu // %zu = %d\n", input_len, STR_SIZE(input), strcpy_sp(buffer, buffer + ARRAY_SIZE(buffer), input)); \
+        printf("%zu // %zu = %d\n", (size_t) input_len, STR_SIZE(input), strcpy_sp(buffer, buffer + ARRAY_SIZE(buffer), input)); \
         TEST_ASSERT((input_len >= STR_SIZE(input)) == strcpy_sp(buffer, buffer + ARRAY_SIZE(buffer), input)); \
-        printf("strncmp(\"%s\", \"%s\", %d) = %d\n", input, buffer, input_len >= STR_SIZE(input) ? STR_LEN(input) : input_len - 1, strncmp(input, buffer, input_len >= STR_SIZE(input) ? STR_LEN(input) : input_len - 1)); \
+        printf("strncmp(\"%s\", \"%s\", %d) = %d\n", input, buffer, (int) (input_len >= STR_SIZE(input) ? STR_LEN(input) : input_len - 1), strncmp(input, buffer, input_len >= STR_SIZE(input) ? STR_LEN(input) : input_len - 1)); \
         TEST_ASSERT(0 == strncmp(input, buffer, input_len >= STR_SIZE(input) ? STR_LEN(input) : input_len - 1)); \
     } while (0);
 
