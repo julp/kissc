@@ -28,7 +28,7 @@ struct _RBTreeNode {
 };
 
 struct _RBTree {
-    RBTreeNode *nil;
+    RBTreeNode nil;
     RBTreeNode *root;
 #ifdef MAINTAIN_FIRST_LAST
     RBTreeNode *first;
@@ -54,17 +54,14 @@ static RBTreeNode *rbtreenode_new(const void *key, void *value)
     return node;
 }
 
-static RBTreeNode *rbtreenode_nil_new(void)
+static RBTreeNode *rbtreenode_nil_init(RBTreeNode *nil)
 {
-    RBTreeNode *node;
+    nil->right = nil->left = nil->parent = nil;
+    nil->color = BLACK;
+    nil->key = NULL;
+    nil->value = NULL;
 
-    node = malloc(sizeof(*node));
-    node->right = node->left = node->parent = node;
-    node->color = BLACK;
-    node->key = NULL;
-    node->value = NULL;
-
-    return node;
+    return nil;
 }
 
 RBTree *rbtree_new(
@@ -81,9 +78,9 @@ RBTree *rbtree_new(
     tree = malloc(sizeof(*tree));
     tree->key_duper = key_duper;
     tree->value_duper = value_duper;
-    tree->root = tree->nil = rbtreenode_nil_new();
+    tree->root = rbtreenode_nil_init(&tree->nil);
 #ifdef MAINTAIN_FIRST_LAST
-    tree->first = tree->last = tree->nil;
+    tree->first = tree->last = &tree->nil;
 #endif
     tree->cmp_func = cmp_func;
     tree->key_dtor = key_dtor;
@@ -103,7 +100,7 @@ bool rbtree_empty(RBTree *tree) /* NONNULL() */
 {
     assert(NULL != tree);
 
-    return tree->nil == tree->root;
+    return &tree->nil == tree->root;
 }
 
 static void rbtree_rotate_left(RBTree *tree, RBTreeNode *node) /* NONNULL() */
@@ -112,11 +109,11 @@ static void rbtree_rotate_left(RBTree *tree, RBTreeNode *node) /* NONNULL() */
 
     p = node->right;
     node->right = p->left;
-    if (p->left != tree->nil) {
+    if (p->left != &tree->nil) {
         p->left->parent = node;
     }
     p->parent = node->parent;
-    if (node->parent == tree->nil) {
+    if (node->parent == &tree->nil) {
         tree->root = p;
     } else if (node == node->parent->left) {
         node->parent->left = p;
@@ -133,11 +130,11 @@ static void rbtree_rotate_right(RBTree *tree, RBTreeNode *node) /* NONNULL() */
 
     p = node->left;
     node->left = p->right;
-    if (p->right != tree->nil) {
+    if (p->right != &tree->nil) {
         p->right->parent = node;
     }
     p->parent = node->parent;
-    if (node->parent == tree->nil) {
+    if (node->parent == &tree->nil) {
         tree->root = p;
     } else if (node == node->parent->right) {
         node->parent->right = p;
@@ -150,7 +147,7 @@ static void rbtree_rotate_right(RBTree *tree, RBTreeNode *node) /* NONNULL() */
 
 static RBTreeNode *rbtreenode_max(RBTree *tree, RBTreeNode *node) /* NONNULL() */
 {
-    while (node->right != tree->nil) {
+    while (node->right != &tree->nil) {
         node = node->right;
     }
 
@@ -159,13 +156,13 @@ static RBTreeNode *rbtreenode_max(RBTree *tree, RBTreeNode *node) /* NONNULL() *
 
 static RBTreeNode *rbtreenode_previous(RBTree *tree, RBTreeNode *node) /* NONNULL() */
 {
-    if (node->left != tree->nil) {
+    if (node->left != &tree->nil) {
         return rbtreenode_max(tree, node->left);
     } else {
         RBTreeNode *y;
 
         y = node->parent;
-        while (y != tree->nil && node == y->left) {
+        while (y != &tree->nil && node == y->left) {
             node = y;
             y = y->parent;
         }
@@ -176,7 +173,7 @@ static RBTreeNode *rbtreenode_previous(RBTree *tree, RBTreeNode *node) /* NONNUL
 
 static RBTreeNode *rbtreenode_min(RBTree *tree, RBTreeNode *node) /* NONNULL() */
 {
-    while (node->left != tree->nil) {
+    while (node->left != &tree->nil) {
         node = node->left;
     }
 
@@ -185,13 +182,13 @@ static RBTreeNode *rbtreenode_min(RBTree *tree, RBTreeNode *node) /* NONNULL() *
 
 static RBTreeNode *rbtreenode_next(RBTree *tree, RBTreeNode *node) /* NONNULL() */
 {
-    if (node->right != tree->nil) {
+    if (node->right != &tree->nil) {
         return rbtreenode_min(tree, node->right);
     } else {
         RBTreeNode *y;
 
         y = node->parent;
-        while (y != tree->nil && node == y->right) {
+        while (y != &tree->nil && node == y->right) {
             node = y;
             y = y->parent;
         }
@@ -218,9 +215,9 @@ bool rbtree_insert(RBTree *tree, uint32_t flags, const void *key, void *value, v
     int cmp;
     RBTreeNode *y, *x, *new;
 
-    y = tree->nil;
+    y = &tree->nil;
     x = tree->root;
-    while (x != tree->nil) {
+    while (x != &tree->nil) {
         y = x;
         if (0 == (cmp = tree->cmp_func(key, x->key))) {
             if (NULL != oldvalue) {
@@ -242,10 +239,10 @@ bool rbtree_insert(RBTree *tree, uint32_t flags, const void *key, void *value, v
     }
     new = rbtreenode_new((const void *) clone(tree->key_duper, key), clone(tree->value_duper, value));
     new->parent = y;
-    new->left = tree->nil;
-    new->right = tree->nil;
+    new->left = &tree->nil;
+    new->right = &tree->nil;
     //new->color = RED; // done in rbtreenode_new
-    if (y == tree->nil) {
+    if (y == &tree->nil) {
         tree->root = new;
 #ifdef MAINTAIN_FIRST_LAST
         tree->first = tree->last = new;
@@ -316,9 +313,9 @@ static RBTreeNode *rbtree_lookup(RBTree *tree, const void *key) /* NONNULL(1) */
     int cmp;
     RBTreeNode *y, *x;
 
-    y = tree->nil;
+    y = &tree->nil;
     x = tree->root;
-    while (x != tree->nil) {
+    while (x != &tree->nil) {
         y = x;
         if (0 == (cmp = tree->cmp_func(key, x->key))) {
             return x;
@@ -406,7 +403,7 @@ bool rbtree_min(RBTree *tree, const void **key, void **value) /* NONNULL(1) */
     assert(NULL != tree);
 
 #ifdef MAINTAIN_FIRST_LAST
-    if (tree->first == tree->nil) {
+    if (tree->first == &tree->nil) {
         return false;
     } else {
         if (NULL != key) {
@@ -419,7 +416,7 @@ bool rbtree_min(RBTree *tree, const void **key, void **value) /* NONNULL(1) */
         return true;
     }
 #else
-    if (tree->root == tree->nil) {
+    if (tree->root == &tree->nil) {
         return false;
     } else {
         RBTreeNode *min;
@@ -451,7 +448,7 @@ bool rbtree_max(RBTree *tree, const void **key, void **value) /* NONNULL(1) */
     assert(NULL != tree);
 
 #ifdef MAINTAIN_FIRST_LAST
-    if (tree->last == tree->nil) {
+    if (tree->last == &tree->nil) {
         return false;
     } else {
         if (NULL != key) {
@@ -464,7 +461,7 @@ bool rbtree_max(RBTree *tree, const void **key, void **value) /* NONNULL(1) */
         return true;
     }
 #else
-    if (tree->root == tree->nil) {
+    if (tree->root == &tree->nil) {
         return false;
     } else {
         RBTreeNode *max;
@@ -484,7 +481,7 @@ bool rbtree_max(RBTree *tree, const void **key, void **value) /* NONNULL(1) */
 
 static void rbtree_transplante(RBTree *tree, RBTreeNode *u, RBTreeNode *v) /* NONNULL() */
 {
-    if (u->parent == tree->nil) {
+    if (u->parent == &tree->nil) {
         tree->root = v;
     } else if (u == u->parent->left) {
         u->parent->left = v;
@@ -520,10 +517,10 @@ bool rbtree_remove(RBTree *tree, const void *key, bool call_dtor) /* NONNULL(1) 
 #endif /* MAINTAIN_FIRST_LAST */
     y = z;
     ycolor = y->color;
-    if (z->left == tree->nil) {
+    if (z->left == &tree->nil) {
         x = z->right;
         rbtree_transplante(tree, z, z->right);
-    } else if (z->right == tree->nil) {
+    } else if (z->right == &tree->nil) {
         x = z->left;
         rbtree_transplante(tree, z, z->left);
     } else {
@@ -611,7 +608,7 @@ static void _rbtree_destroy(RBTree *tree, RBTreeNode *node) /* NONNULL(1) */
 {
     assert(NULL != tree);
 
-    if (node != tree->nil) {
+    if (node != &tree->nil) {
         _rbtree_destroy(tree, node->right);
         _rbtree_destroy(tree, node->left);
         if (NULL != tree->value_dtor) {
@@ -634,7 +631,7 @@ void rbtree_clear(RBTree *tree) /* NONNULL() */
     assert(NULL != tree);
 
     _rbtree_destroy(tree, tree->root);
-    tree->root = tree->nil;
+    tree->root = &tree->nil;
 }
 
 /**
@@ -647,13 +644,12 @@ void rbtree_destroy(RBTree *tree) /* NONNULL() */
     assert(NULL != tree);
 
     _rbtree_destroy(tree, tree->root);
-    free(tree->nil);
     free(tree);
 }
 
 static void _rbtree_traverse_in_order(RBTree *tree, RBTreeNode *node, TravFunc trav_func) /* NONNULL(2) */
 {
-    if (node != tree->nil) {
+    if (node != &tree->nil) {
         _rbtree_traverse_in_order(tree, node->left, trav_func);
         trav_func(node->key, node->value);
         _rbtree_traverse_in_order(tree, node->right, trav_func);
@@ -662,7 +658,7 @@ static void _rbtree_traverse_in_order(RBTree *tree, RBTreeNode *node, TravFunc t
 
 static void _rbtree_traverse_pre_order(RBTree *tree, RBTreeNode *node, TravFunc trav_func) /* NONNULL(2) */
 {
-    if (node != tree->nil) {
+    if (node != &tree->nil) {
         trav_func(node->key, node->value);
         _rbtree_traverse_pre_order(tree, node->left, trav_func);
         _rbtree_traverse_pre_order(tree, node->right, trav_func);
@@ -671,7 +667,7 @@ static void _rbtree_traverse_pre_order(RBTree *tree, RBTreeNode *node, TravFunc 
 
 static void _rbtree_traverse_post_order(RBTree *tree, RBTreeNode *node, TravFunc trav_func) /* NONNULL(2) */
 {
-    if (node != tree->nil) {
+    if (node != &tree->nil) {
         _rbtree_traverse_post_order(tree, node->left, trav_func);
         _rbtree_traverse_post_order(tree, node->right, trav_func);
         trav_func(node->key, node->value);
