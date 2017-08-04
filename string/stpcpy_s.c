@@ -5,22 +5,22 @@
  *
  * @param to
  * @param from
- * @param zero
+ * @param to_limit
  *
  * @return
  */
-char *stpcpy_sp(char *to, const char *from, const char * const zero)
+char *stpcpy_sp(char *to, const char *from, const char * const to_limit)
 {
-    const char * const end = zero - 1;
+    const char * const zero = to_limit - 1;
 
-    if (NULL == to || to >= end) {
+    if (NULL == to || to >= zero) {
         return NULL;
     }
     if (NULL != from) {
-        while (to < end && '\0' != (*to++ = *from++))
+        while (to < zero && '\0' != (*to++ = *from++))
             ;
     }
-    if (to == end) {
+    if (to == zero) {
         *to = '\0';
         return NULL;
     } else {
@@ -28,6 +28,7 @@ char *stpcpy_sp(char *to, const char *from, const char * const zero)
     }
 }
 
+#if 0
 /**
  * X
  *
@@ -42,3 +43,4 @@ size_t stpcpy_sl(char *to, const char *from, const char * const *string, size_t 
 {
     //
 }
+#endif

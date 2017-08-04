@@ -2,15 +2,39 @@ cmake_minimum_required(VERSION 2.8.3)
 
 project(kissc C)
 
+if(CMAKE_VERSION VERSION_GREATER "3.1.0")
+    set(CMAKE_C_STANDARD 99)
+    set(CMAKE_C_STANDARD_REQUIRED TRUE)
+else(CMAKE_VERSION VERSION_GREATER "3.1.0")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99") # "poor" fallback
+endif(CMAKE_VERSION VERSION_GREATER "3.1.0")
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra -Wwrite-strings -Wstrict-prototypes -Wuninitialized -Wunreachable-code -Wno-comment -Wnonnull -Wunreachable-code")
+
 option(UT "enable unit tests" ON)
+
+include(CheckFunctionExists)
+check_function_exists("reallocarray" HAVE_REALLOCARRAY)
+
+if(HAVE_REALLOCARRAY)
+    # TODO: use it
+    # TODO: better to do this with configure_file
+    add_definitions(-DHAVE_REALLOCARRAY)
+endif(HAVE_REALLOCARRAY)
+
+# configure_file(
+#     "config.h.in"
+#     "config.h"
+#     @ONLY
+# )
 
 set(SOURCES
     iterator/iterator.c
     rbtree/rbtree.c
 #     hashtable/hashtable.c
-    dynamic_arrays/darray.c
+    dynamic_arrays/darray.c dynamic_arrays/dptrarray.c
     unicode/utf8.c unicode/nfd.c
-    string/strcmp_l.c string/parsenum.c string/strcpy_s.c string/strcat_s.c
+    string/memcmp_l.c string/memncmp_l.c string/memstr.c string/parsenum.c string/strcpy_s.c string/strcat_s.c string/stpcpy_s.c string/stpncpy_s.c
 )
 add_library(kissc SHARED ${SOURCES})
 
@@ -27,9 +51,9 @@ if(UT)
     file(GLOB UNITY_SRC unity/*.c)
     add_library(unity SHARED ${UNITY_SRC})
 
-    add_executable(test_strncmp_l tests/strncmp_l.c) # unity/unity.c
-    target_link_libraries(test_strncmp_l kissc unity)
-    add_test("strncmp_l" test_strncmp_l)
+    add_executable(test_memncmp_l tests/memncmp_l.c) # unity/unity.c
+    target_link_libraries(test_memncmp_l kissc unity)
+    add_test("memncmp_l" test_memncmp_l)
 
     add_executable(test_strcpy_s tests/strcpy_s.c) # unity/unity.c
     target_link_libraries(test_strcpy_s kissc unity)

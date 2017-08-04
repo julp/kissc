@@ -88,7 +88,7 @@ static inline void darray_maybe_resize_to(DArray *da, size_t total_length)
     if (UNEXPECTED(total_length >= da->allocated)) {
         da->allocated = ((total_length / da->capacity_increment) + 1) * da->capacity_increment;
         da->data = realloc(da->data, da->element_size * da->allocated);
-        darray_wipeout(da, da->allocated);
+        darray_wipeout(da, da->allocated - da->length);
     }
 }
 
