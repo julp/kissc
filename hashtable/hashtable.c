@@ -11,6 +11,7 @@
 #include "utils.h"
 #include "nearest_power.h"
 #include "hashtable.h"
+#include "ascii.h"
 
 #define HASHTABLE_MIN_SIZE 8
 

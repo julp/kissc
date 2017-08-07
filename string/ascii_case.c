@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include "utils.h"
 
 static const unsigned char lower[] = {
@@ -17,7 +18,7 @@ static const unsigned char lower[] = {
     0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF,
     0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9, 0xEA, 0xEB, 0xEC, 0xED, 0xEE, 0xEF,
     0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF
-}
+};
 
 static const unsigned char upper[] = {
     0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
@@ -36,7 +37,7 @@ static const unsigned char upper[] = {
     0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF,
     0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7, 0xE8, 0xE9, 0xEA, 0xEB, 0xEC, 0xED, 0xEE, 0xEF,
     0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF
-}
+};
 
 int ascii_isupper(int c)
 {
@@ -58,12 +59,13 @@ int ascii_tolower(int c)
     return (int) lower[(unsigned char) c];
 }
 
-int ascii_memcasecmp(const char *str1, const char *str2, int n)
+#if 1
+int ascii_memcasecmp(const char *str1, const char *str2, size_t n)
 {
     int c1, c2;
 
     if (str1 != str2) {
-        while (n--) {
+        while (0 != n--) {
             c1 = ascii_toupper(*(unsigned char *) str1++);
             c2 = ascii_toupper(*(unsigned char *) str2++);
             if (c1 != c2) {
@@ -74,6 +76,24 @@ int ascii_memcasecmp(const char *str1, const char *str2, int n)
 
     return 0;
 }
+#else
+int ascii_memcasecmp(const char *str1, const char *str2, size_t n)
+{
+    if (str1 != str2) {
+        for (; 0 != n; n--) {
+            int c1, c2;
+
+            c1 = ascii_toupper(*(unsigned char *) str1++);
+            c2 = ascii_toupper(*(unsigned char *) str2++);
+            if (c1 != c2) {
+                return (unsigned char) c1 - (unsigned char) c2;
+            }
+        }
+    }
+
+    return 0;
+}
+#endif
 
 int ascii_strcasecmp(const char *str1, const char *str2)
 {
@@ -108,7 +128,7 @@ int ascii_strcasecmp_l(
         } else {
             min_len = str1_len;
         }
-        while (min_len--) {
+        while (0 != min_len--) {
             c1 = ascii_toupper(*(unsigned char *) str1++);
             c2 = ascii_toupper(*(unsigned char *) str2++);
             if (c1 != c2) {
@@ -131,7 +151,7 @@ int ascii_strncasecmp(const char *str1, const char *str2, size_t n)
             }
             c1 = ascii_toupper(*(unsigned char *) str1++);
             c2 = ascii_toupper(*(unsigned char *) str2++);
-        } while (c1 == c2 && --n > 0);
+        } while (c1 == c2 && 0 != --n);
 
         return (unsigned char) c1 - (unsigned char) c2;
     }
@@ -156,7 +176,7 @@ int ascii_strncasecmp_l(
             }
             c1 = ascii_toupper(*(unsigned char *) str1++);
             c2 = ascii_toupper(*(unsigned char *) str2++);
-        } while (c1 == c2 && --min_len > 0);
+        } while (c1 == c2 && 0 != --min_len);
 
         return (unsigned char) c1 - (unsigned char) c2;
     }
@@ -175,21 +195,4 @@ char *ascii_memcasechr(const char *str, int c, size_t n)
     }
 
     return NULL;
-}
-
-int ascii_memcasecmp(const char *str1, const char *str2, size_t n)
-{
-    if (str1 != str2) {
-        for (; 0 != n; n--) {
-            int c1, c2;
-
-            c1 = ascii_toupper(*(unsigned char *) str1++);
-            c2 = ascii_toupper(*(unsigned char *) str2++);
-            if (c1 != c2) {
-                return (unsigned char) c1 - (unsigned char) c2;
-            }
-        }
-    }
-
-    return 0;
 }

@@ -31,10 +31,10 @@ endif(HAVE_REALLOCARRAY)
 set(SOURCES
     iterator/iterator.c
     rbtree/rbtree.c
-#     hashtable/hashtable.c
+    hashtable/hashtable.c
     dynamic_arrays/darray.c dynamic_arrays/dptrarray.c
     unicode/utf8.c unicode/nfd.c
-    string/memcmp_l.c string/memncmp_l.c string/memstr.c string/parsenum.c string/strcpy_s.c string/strcat_s.c string/stpcpy_s.c string/stpncpy_s.c
+    string/ascii_case.c string/memcmp_l.c string/memncmp_l.c string/memstr.c string/parsenum.c string/strcpy_s.c string/strcat_s.c string/stpcpy_s.c string/stpncpy_s.c
 )
 add_library(kissc SHARED ${SOURCES})
 
