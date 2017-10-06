@@ -49,12 +49,14 @@ bool _hashtable_quick_contains(HashTable *, ht_hash_t, ht_key_t);
 bool _hashtable_quick_delete(HashTable *, ht_hash_t, ht_key_t, bool);
 bool _hashtable_quick_get(HashTable *, ht_hash_t, ht_key_t, void **);
 bool _hashtable_quick_put(HashTable *, uint32_t, ht_hash_t, ht_key_t, void *, void **);
-bool ascii_equal_ci(ht_key_t, ht_key_t);
 bool ascii_equal_cs(ht_key_t, ht_key_t);
-ht_hash_t ascii_hash_ci(ht_key_t);
 ht_hash_t ascii_hash_cs(ht_key_t);
-void hashtable_ascii_ci_init(HashTable *, DupFunc, DtorFunc, DtorFunc);
 void hashtable_ascii_cs_init(HashTable *, DupFunc, DtorFunc, DtorFunc);
+#ifndef WITHOUT_ASCII_CI
+bool ascii_equal_ci(ht_key_t, ht_key_t);
+ht_hash_t ascii_hash_ci(ht_key_t);
+void hashtable_ascii_ci_init(HashTable *, DupFunc, DtorFunc, DtorFunc);
+#endif /* !WITHOUT_ASCII_CI */
 void hashtable_clear(HashTable *);
 void hashtable_destroy(HashTable *);
 bool _hashtable_direct_contains(HashTable *, ht_hash_t);

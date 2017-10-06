@@ -7,7 +7,7 @@
  * @param to_limit position right after the last usable byte of *to* (this is to + its size)
  * @param from the input string to copy
  *
- * @return false if the buffer was unsufficient
+ * @return `false` if the buffer was insufficient
  *
  * For:
  * \code

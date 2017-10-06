@@ -11,7 +11,9 @@
 #include "utils.h"
 #include "nearest_power.h"
 #include "hashtable.h"
-#include "ascii.h"
+#ifndef WITHOUT_ASCII_CI
+# include "ascii.h"
+#endif /* !WITHOUT_ASCII_CI */
 
 #define HASHTABLE_MIN_SIZE 8
 
@@ -50,6 +52,7 @@ ht_hash_t ascii_hash_cs(ht_key_t k)
     return h;
 }
 
+#ifndef WITHOUT_ASCII_CI
 bool ascii_equal_ci(ht_key_t k1, ht_key_t k2)
 {
     const char *string1 = (const char *) k1;
@@ -74,6 +77,7 @@ ht_hash_t ascii_hash_ci(ht_key_t k)
 
     return h;
 }
+#endif /* !WITHOUT_ASCII_CI */
 
 static inline void hashtable_rehash(HashTable *ht)
 {
@@ -161,6 +165,7 @@ void hashtable_ascii_cs_init(HashTable *ht, DupFunc key_duper, DtorFunc key_dtor
     hashtable_init(ht, HASHTABLE_MIN_SIZE, ascii_hash_cs, ascii_equal_cs, key_duper, key_dtor, value_dtor);
 }
 
+#ifndef WITHOUT_ASCII_CI
 /**
  * Helper to initialize a hashtable for (ASCII) case insensitive strings as keys
  *
@@ -173,6 +178,7 @@ void hashtable_ascii_ci_init(HashTable *ht, DupFunc key_duper, DtorFunc key_dtor
 {
     hashtable_init(ht, HASHTABLE_MIN_SIZE, ascii_hash_ci, ascii_equal_ci, key_duper, key_dtor, value_dtor);
 }
+#endif /* !WITHOUT_ASCII_CI */
 
 /**
  * Compute the hash for the given key

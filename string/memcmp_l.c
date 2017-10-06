@@ -1,14 +1,19 @@
 #include <stddef.h>
 
 /**
- * XXX
+ * Compare two substrings.
+ * Since the length of each two is provided, you can compare
+ * only part of the strings and/or strings which are not `'\0'`-terminated.
  *
- * @param str1
- * @param str1_len
- * @param str2
- * @param str2_len
+ * @param str1 the first of the two substrings to compare
+ * @param str1_len its length
+ * @param str2 the second of the two substrings to compare
+ * @param str2_len its length
  *
- * @return
+ * @return an integer as follows:
+ *   - < 0 if *str1* is less than *str2*
+ *   - 0 if *str1* equals *str2*
+ *   - > 0 if *str1* is greater than *str2*
  */
 int memcmp_l(
     const char *str1, size_t str1_len,
