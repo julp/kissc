@@ -29,11 +29,12 @@ endif(HAVE_REALLOCARRAY)
 # )
 
 set(SOURCES
-    iterator/iterator.c
+    lists/dlist.c
     rbtree/rbtree.c
+    iterator/iterator.c
     hashtable/hashtable.c
     dynamic_arrays/darray.c dynamic_arrays/dptrarray.c
-    unicode/utf8.c unicode/nfd.c
+    unicode/utf8.c # unicode/nfd.c
     string/ascii_case.c string/memcmp_l.c string/memncmp_l.c string/memstr.c string/parsenum.c string/strcpy_s.c string/strcat_s.c string/stpcpy_s.c string/stpncpy_s.c
 )
 add_library(kissc SHARED ${SOURCES})
@@ -67,9 +68,9 @@ if(UT)
     target_link_libraries(test_parsenum kissc unity)
     add_test("parsenum" test_parsenum)
 
-    add_executable(test_nfd tests/nfd.c) # unity/unity.c
-    target_link_libraries(test_nfd kissc)# unity)
-    add_test("nfd" test_nfd)
+    #add_executable(test_nfd tests/nfd.c) # unity/unity.c
+    #target_link_libraries(test_nfd kissc)# unity)
+    #add_test("nfd" test_nfd)
 
     add_executable(test_utf8 tests/utf8.c) # unity/unity.c
     target_link_libraries(test_utf8 kissc)# unity)
