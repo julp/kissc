@@ -48,7 +48,7 @@ void dlist_clear(DList *list)
     DListElement *tmp, *last;
 
     tmp = list->head;
-    while (tmp) {
+    while (NULL != tmp) {
         last = tmp;
         tmp = tmp->next;
         if (NULL != list->dtor) {
@@ -260,7 +260,7 @@ void dlist_remove_tail(DList *list)
 {
     DListElement *tmp;
 
-    if (list->tail) {
+    if (NULL != list->tail) {
         tmp = list->tail;
         list->tail = list->tail->prev;
         if (NULL != list->tail) {
