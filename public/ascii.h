@@ -1,8 +1,10 @@
 #pragma once
 
-int ascii_isupper(int c);
+#include <stdbool.h>
+
+bool ascii_isupper(int c);
 int ascii_toupper(int c);
-int ascii_islower(int c);
+bool ascii_islower(int c);
 int ascii_tolower(int c);
 int ascii_memcasecmp(const char *str1, const char *str2, size_t n);
 int ascii_strcasecmp(const char *str1, const char *str2);
