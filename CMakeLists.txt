@@ -37,6 +37,18 @@ set(SOURCES
     unicode/utf8.c # unicode/nfd.c
     string/ascii_case.c string/memcmp_l.c string/memncmp_l.c string/memstr.c string/parsenum.c string/strcpy_s.c string/strcat_s.c string/stpcpy_s.c string/stpncpy_s.c
 )
+
+find_package(Doxygen QUIET)
+if(DOXYGEN_FOUND)
+    configure_file(
+        "${PROJECT_SOURCE_DIR}/doxygen.conf.in"
+        "${PROJECT_BINARY_DIR}/doxygen.conf"
+        @ONLY
+    )
+    # TODO: mettre les sources en DEPENDS pour ne pas que CMake relance doxygen inutilement
+    add_custom_target(api_doc ALL doxygen "${PROJECT_BINARY_DIR}/doxygen.conf" DEPENDS "${PROJECT_SOURCE_DIR}/doc.h")
+endif(DOXYGEN_FOUND)
+
 add_library(kissc SHARED ${SOURCES})
 
 add_executable(nfd bin/nfd.c)
