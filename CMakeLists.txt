@@ -29,13 +29,18 @@ endif(HAVE_REALLOCARRAY)
 # )
 
 set(SOURCES
+    error/error.c
     lists/dlist.c
     rbtree/rbtree.c
     iterator/iterator.c
     hashtable/hashtable.c
     dynamic_arrays/darray.c dynamic_arrays/dptrarray.c
-    unicode/utf8.c # unicode/nfd.c
-    string/ascii_case.c string/memcmp_l.c string/memncmp_l.c string/memstr.c string/parsenum.c string/strcpy_s.c string/strcat_s.c string/stpcpy_s.c string/stpncpy_s.c
+    unicode/utf8.c
+    string/parsenum.c
+    string/str_starts_with.c
+    string/ascii_case.c string/memcmp_l.c string/memncmp_l.c string/memstr.c
+    string/strcpy_s.c string/strncpy_s.c string/strcat_s.c string/stpcpy_s.c string/stpncpy_s.c
+    string/strvconcat_s.c string/str_split.c
 )
 
 find_package(Doxygen QUIET)
@@ -61,32 +66,27 @@ include_directories(
 )
 
 if(UT)
-    file(GLOB UNITY_SRC unity/*.c)
-    add_library(unity SHARED ${UNITY_SRC})
+    add_library(unity SHARED unity/unity.c)
 
-    add_executable(test_memncmp_l tests/memncmp_l.c) # unity/unity.c
+    add_executable(test_memncmp_l tests/memncmp_l.c)
     target_link_libraries(test_memncmp_l kissc unity)
     add_test("memncmp_l" test_memncmp_l)
 
-    add_executable(test_strcpy_s tests/strcpy_s.c) # unity/unity.c
+    add_executable(test_strcpy_s tests/strcpy_s.c)
     target_link_libraries(test_strcpy_s kissc unity)
     add_test("strcpy_s" test_strcpy_s)
 
-    add_executable(test_strcat_s tests/strcat_s.c) # unity/unity.c
+    add_executable(test_strcat_s tests/strcat_s.c)
     target_link_libraries(test_strcat_s kissc unity)
     add_test("strcat_s" test_strcat_s)
 
-    add_executable(test_parsenum tests/parsenum.c) # unity/unity.c
+    add_executable(test_parsenum tests/parsenum.c)
     target_link_libraries(test_parsenum kissc unity)
     add_test("parsenum" test_parsenum)
 
-    #add_executable(test_nfd tests/nfd.c) # unity/unity.c
-    #target_link_libraries(test_nfd kissc)# unity)
-    #add_test("nfd" test_nfd)
-
-    add_executable(test_utf8 tests/utf8.c) # unity/unity.c
-    target_link_libraries(test_utf8 kissc)# unity)
-    add_test("utf8" test_utf8)
+    add_executable(test_array_iterator tests/array_iterator.c)
+    target_link_libraries(test_array_iterator kissc unity)
+    add_test("iterator" test_array_iterator)
 
     enable_testing()
 endif(UT)

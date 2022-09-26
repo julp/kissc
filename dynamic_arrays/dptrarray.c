@@ -467,7 +467,8 @@ void dptrarray_to_iterator(Iterator *it, DPtrArray *this)
         dptrarray_iterator_current,
         dptrarray_iterator_next, dptrarray_iterator_previous,
         dptrarray_iterator_is_valid,
-        NULL
+        NULL,
+        (iterator_count_t) dptrarray_length, NULL, NULL
     );
 }
 #endif /* !WITHOUT_ITERATOR */

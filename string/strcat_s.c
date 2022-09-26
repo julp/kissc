@@ -1,3 +1,6 @@
+#include <stddef.h>
+#include <assert.h>
+
 #include "strcat_s.h"
 
 /**
@@ -12,6 +15,10 @@
 bool strcat_sp(char *to, const char * const to_limit, const char *suffix)
 {
     const char * const zero = to_limit - 1;
+
+    assert(NULL != to);
+    assert(NULL != to_limit);
+    assert(NULL != suffix);
 
     for (; '\0' != *to; to++)
         ;

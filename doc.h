@@ -5,7 +5,6 @@
  * Strings:
  * <ul>
  *  <li>\ref string/parsenum.c</li>
- *  <li>\ref string/ascii_case.c</li>
  *  <li>
  *   Safe (out of bounds) string.h functions variants:
  *   <ul>
@@ -23,6 +22,14 @@
  *    </li>
  *   </ul>
  *  </li>
+ *  <ul>
+ *   <li>
+ *    Case handling:
+ *    <ul>
+ *     <li>\ref string/ascii_case.c</li>
+ *    </ul>
+ *   </li>
+ *  </ul>
  * </ul>
  *
  * Data structures:

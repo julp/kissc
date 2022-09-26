@@ -1,4 +1,5 @@
 #include <stddef.h>
+#include <assert.h>
 
 /**
  * Safely copy a string into a buffer and get back a pointer to its trailing nul
@@ -33,6 +34,10 @@
 char *stpcpy_sp(char *to, const char *from, const char * const to_limit)
 {
     const char * const zero = to_limit - 1;
+
+    // assert(NULL != to);
+    // assert(NULL != from);
+    assert(NULL != to_limit);
 
     if (NULL == to || to >= zero) {
         return NULL;

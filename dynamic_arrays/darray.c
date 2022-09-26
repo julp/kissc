@@ -480,7 +480,8 @@ void darray_to_iterator(Iterator *it, DArray *da)
         darray_iterator_current,
         darray_iterator_next, darray_iterator_previous,
         darray_iterator_is_valid,
-        NULL
+        NULL,
+        (iterator_count_t) darray_length, NULL, NULL
     );
 }
 #endif /* !WITHOUT_ITERATOR */

@@ -55,7 +55,7 @@ static void runTest(UnityTestFunction test)
     }
 }
 
-void resetTest()
+void resetTest(void)
 {
     tearDown();
     setUp();

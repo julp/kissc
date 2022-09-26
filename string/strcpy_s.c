@@ -1,3 +1,6 @@
+#include <stddef.h>
+#include <assert.h>
+
 #include "strcpy_s.h"
 
 /**
@@ -32,6 +35,10 @@
 bool strcpy_sp(char *to, const char * const to_limit, const char *from)
 {
     const char * const zero = to_limit - 1;
+
+    assert(NULL != to);
+    assert(NULL != to_limit);
+    assert(NULL != from);
 
 //     if (to == zero) {
 //         *to = '\0';
