@@ -8,25 +8,27 @@ void _error_set(char **error, const char *format, ...)
 {
     if (NULL != error) {
         int len;
-        va_list ap;
+        va_list ap, aq;
 
         if (NULL != *error) {
             fprintf(stderr, "Warning: overwrite attempt of a previous error: %s\n", *error);
-            free(error);
+            error_free(error);
         }
         va_start(ap, format);
-        len = vsnprintf(NULL, 0, format, ap);
-        va_end(ap);
+        va_copy(aq, ap);
+        len = vsnprintf(NULL, 0, format, aq);
+        va_end(aq);
         if (len >= 0) {
             int chk, size;
 
             size = len + 1;
-            va_start(ap, format);
             *error = malloc(size * sizeof(**error));
+            assert(NULL != *error);
             chk = vsnprintf(*error, size, format, ap);
             assert(chk >= 0 && chk == len);
-            va_end(ap);
+            (void) chk; // quiet warning variable 'chk' set but not used when assert is turned off
         }
+        va_end(ap);
     }
 }
 
