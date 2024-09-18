@@ -1,5 +1,5 @@
 /**
- * @file lib/dlist.c
+ * @file lists/dlist.c
  * @brief double linked list
  */
 
@@ -27,6 +27,15 @@ static inline DListElement *alloc_element(DList *list, void *data, char **error)
     return el;
 }
 
+/**
+ * Creates (heap allocated) a double linked list
+ *
+ * @param dup
+ * @param dtor
+ * @param error
+ *
+ * @return the dynamic allocated double linked list
+ */
 DList *dlist_new(DupFunc dup, DtorFunc dtor, char **error)
 {
     DList *list;
@@ -40,6 +49,13 @@ DList *dlist_new(DupFunc dup, DtorFunc dtor, char **error)
     return list;
 }
 
+/**
+ * Initializes a (stack allocated) double linked list
+ *
+ * @param list the double linked list
+ * @param dup
+ * @param dtor
+ */
 void dlist_init(DList *list, DupFunc dup, DtorFunc dtor)
 {
     assert(NULL != list);
@@ -51,7 +67,7 @@ void dlist_init(DList *list, DupFunc dup, DtorFunc dtor)
 }
 
 /**
- * Get the length of double linked list
+ * Get the length of the double linked list *list*
  * This information is maintained into the list, its
  * elements are not traversed at each call.
  *
@@ -67,7 +83,11 @@ size_t dlist_length(DList *list)
 }
 
 /**
- * Destroy the elements of a double linked list
+ * Destroy the elements of a double linked list but not
+ * the list itself. Used to clear/empty it before reuse.
+ *
+ * If a destructor was set at the creation of the list,
+ * it will be invoked for each data.
  *
  * @param list the list to clear
  */
@@ -90,6 +110,16 @@ void dlist_clear(DList *list)
     list->head = list->tail = NULL;
 }
 
+/**
+ * Clear and free a dynamic allocated double linked list
+ * (must only be used for a list created by `dlist_new`
+ * else use `dlist_clear` instead).
+ *
+ * If a destructor was set at the creation of the list,
+ * it will be invoked for each data.
+ *
+ * @param list the list to clear
+ */
 void dlist_destroy(DList *list)
 {
     assert(NULL != list);
@@ -98,6 +128,15 @@ void dlist_destroy(DList *list)
     free(list);
 }
 
+/**
+ * Append *data* to *list*
+ *
+ * @param list the double linked list
+ * @param data
+ * @param error
+ *
+ * @return `true` on success, `false` on error (memory allocation failure)
+ */
 bool dlist_append(DList *list, void *data, char **error)
 {
     bool ok;
@@ -126,6 +165,17 @@ bool dlist_append(DList *list, void *data, char **error)
     return ok;
 }
 
+/**
+ * Find the first element in a list to match according a callback
+ *
+ * @param list the double linked list
+ * @param cmp a callback to compare datas (data from the current item to *data*)
+ *            returns 0 if both are equals, a negative value if *data* is greater,
+ *            posivite if *data* is smaller.
+ * @param data the data to be compared to
+ *
+ * @return `NULL` if there is no match else the matching list element
+ */
 DListElement *dlist_find_first(DList *list, CmpFunc cmp, void *data)
 {
     DListElement *el;
@@ -142,6 +192,17 @@ DListElement *dlist_find_first(DList *list, CmpFunc cmp, void *data)
     return NULL;
 }
 
+/**
+ * Find the last element in a list to match according a callback
+ *
+ * @param list the double linked list
+ * @param cmp a callback to compare datas (data from the current item to *data*)
+ *            returns 0 if both are equals, a negative value if *data* is greater,
+ *            posivite if *data* is smaller.
+ * @param data the data to be compared to
+ *
+ * @return `NULL` if there is no match else the matching list element
+ */
 DListElement *dlist_find_last(DList *list, CmpFunc cmp, void *data)
 {
     DListElement *el;
@@ -158,6 +219,16 @@ DListElement *dlist_find_last(DList *list, CmpFunc cmp, void *data)
     return NULL;
 }
 
+/**
+ * Inserts data before a specific element in the list
+ *
+ * @param list the double linked list
+ * @param sibling
+ * @param data the data to be added
+ * @param error
+ *
+ * @return `true` on success, `false` on error (memory allocation failure)
+ */
 bool dlist_insert_before(DList *list, DListElement *sibling, void *data, char **error)
 {
     bool ok;
@@ -186,6 +257,16 @@ bool dlist_insert_before(DList *list, DListElement *sibling, void *data, char **
     return ok;
 }
 
+/**
+ * Inserts data after a specific element in the list
+ *
+ * @param list the double linked list
+ * @param sibling
+ * @param data the data to be added
+ * @param error
+ *
+ * @return `true` on success, `false` on error (memory allocation failure)
+ */
 bool dlist_insert_after(DList *list, DListElement *sibling, void *data, char **error)
 {
     bool ok;
@@ -214,6 +295,17 @@ bool dlist_insert_after(DList *list, DListElement *sibling, void *data, char **e
     return ok;
 }
 
+/**
+ * Gets list element at a given position
+ *
+ * @param list the double linked list
+ * @param n the position of the item in the list.
+ *          If negative, it is counted from the tail
+ *          of the list.
+ *
+ * @return `NULL` if *n* is out of bounds else the
+ *         list element at that location
+ */
 DListElement *dlist_link_at(DList *list, int n)
 {
     size_t offset;
@@ -238,6 +330,19 @@ DListElement *dlist_link_at(DList *list, int n)
     return el;
 }
 
+/**
+ * Inserts data at (before) a given position.
+ *
+ * @param list the double linked list
+ * @param n the position of the item in the list.
+ *          If negative, it is counted from the tail
+ *          of the list.
+ * @param data the data to be inserted
+ * @param error
+ *
+ * @return `true` on success, `false` on error (memory allocation
+ *         failure or if *n* is out of bounds)
+ */
 bool dlist_insert_at(DList *list, int n, void *data, char **error)
 {
     DListElement *el;
@@ -251,6 +356,16 @@ bool dlist_insert_at(DList *list, int n, void *data, char **error)
     }
 }
 
+/**
+ * Removes element at a given position.
+ *
+ * @param list the double linked list
+ * @param n the position of the item in the list.
+ *          If negative, it is counted from the tail
+ *          of the list.
+ *
+ * @return `true` on success, `false` on error (*n* is out of bounds)
+ */
 bool dlist_remove_at(DList *list, int n)
 {
     DListElement *el;
@@ -265,6 +380,13 @@ bool dlist_remove_at(DList *list, int n)
     }
 }
 
+/**
+ * Is the double linked list empty?
+ *
+ * @param list the double linked list
+ *
+ * @return `true` if *list* is empty else `false`
+ */
 bool dlist_empty(DList *list)
 {
     assert(NULL != list);
@@ -272,6 +394,15 @@ bool dlist_empty(DList *list)
     return NULL == list->head;
 }
 
+/**
+ * Prepend *data* to *list*
+ *
+ * @param list the double linked list
+ * @param data
+ * @param error
+ *
+ * @return `true` on success, `false` on error (memory allocation failure)
+ */
 bool dlist_prepend(DList *list, void *data, char **error)
 {
     bool ok;
@@ -300,6 +431,14 @@ bool dlist_prepend(DList *list, void *data, char **error)
     return ok;
 }
 
+/**
+ * Removes data at the head of a list
+ *
+ * @param list the double linked list
+ *
+ * @note if a destructor has been set it will be called
+ *       to free/clean the removed item(s)
+ */
 void dlist_remove_head(DList *list)
 {
     DListElement *tmp;
@@ -322,6 +461,15 @@ void dlist_remove_head(DList *list)
     }
 }
 
+/**
+ * Removes an element from the list
+ *
+ * @param list the double linked list
+ * @param element the element to remove
+ *
+ * @note if a destructor has been set it will be called
+ *       to free/clean the removed item(s)
+ */
 void dlist_remove_link(DList *list, DListElement *element)
 {
     assert(NULL != list);
@@ -352,6 +500,14 @@ void dlist_remove_link(DList *list, DListElement *element)
     --list->length;
 }
 
+/**
+ * Removes data at the tail of a list
+ *
+ * @param list the double linked list
+ *
+ * @note if a destructor has been set it will be called
+ *       to free/clean the removed item(s)
+ */
 void dlist_remove_tail(DList *list)
 {
     DListElement *tmp;
@@ -391,6 +547,15 @@ static DListElement *resolve_position(DList *list, int n)
     return (0 == c && NULL != cur) ? cur : NULL;
 }
 
+/**
+ * Gets data at a given position into the list
+ *
+ * @param list the double linked list
+ * @param n
+ * @param data
+ *
+ * @return `false` if *n* is out of bounds else `true`
+ */
 bool dlist_at(DList *list, int n, void **data)
 {
     DListElement *cur;
@@ -405,6 +570,12 @@ bool dlist_at(DList *list, int n, void **data)
     return NULL != cur;
 }
 
+/**
+ * Sorts the items of a list
+ *
+ * @param list the double linked list
+ * @param cmp
+ */
 void dlist_sort(DList *list, CmpFunc cmp)
 {
     assert(NULL != list);
@@ -433,6 +604,86 @@ void dlist_sort(DList *list, CmpFunc cmp)
         } while (swapped);
     }
 }
+
+/* <stack - LIFO - operations> */
+
+/**
+ * Removes and returns data at top/head of a stack/list
+ *
+ * @param list the double linked list
+ * @param data
+ *
+ * @return `false` if *list* is empty else `true`
+ *
+ * @note returns a boolean to be able to distinguish a `NULL`
+ *       data to an empty list
+ *
+ * @note if a destructor has been set it will not be called against *\*data*
+ *       (caller is responsible to free/clean)
+ *
+ * @see dlist_remove_head
+ */
+bool dlist_pop(DList *list, void **data)
+{
+    bool had_any;
+    DListElement *tmp;
+
+    assert(NULL != list);
+    assert(NULL != data);
+
+    if ((had_any = (NULL != list->head))) {
+        tmp = list->head;
+        list->head = list->head->next;
+        if (NULL != list->head) {
+            list->head->prev = NULL;
+        } else {
+            list->head = list->tail = NULL;
+        }
+        *data = tmp->data;
+/*
+        // don't call the destructor (but keep the code as a "reminder")
+        if (NULL != list->dtor) {
+            list->dtor(tmp->data);
+        }
+*/
+        free(tmp);
+        --list->length;
+    }
+
+    return had_any;
+}
+
+/**
+ * @see dlist_prepend
+ */
+bool dlist_push(DList *list, void *data, char **error)
+{
+    return dlist_prepend(list, data, error);
+}
+
+/**
+ * Gets data at top/head of a stack/list
+ *
+ * @param list the double linked list
+ * @param data
+ *
+ * @return `false` if *list* is empty else `true`
+ *
+ * @note returns a boolean to be able to distinguish a `NULL`
+ *       data to an empty list
+ */
+bool dlist_top(DList *list, void **data)
+{
+    assert(NULL != list);
+    assert(NULL != data);
+
+    if (NULL == list->head) {
+        *data = list->head->data;
+    }
+
+    return NULL != list->head;
+}
+/* </stack - LIFO - operations> */
 
 #ifndef WITHOUT_ITERATOR
 static void dlist_iterator_first(const void *collection, void **state)

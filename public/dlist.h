@@ -42,6 +42,11 @@ void dlist_remove_tail(DList *);
 bool dlist_at(DList *, int, void **);
 void dlist_sort(DList *, CmpFunc);
 
+// LIFO operations
+bool dlist_top(DList *, void **);
+bool dlist_push(DList *, void *, char **);
+bool dlist_top(DList *, void **);
+
 #ifndef WITHOUT_ITERATOR
 # include "iterator.h"
 
