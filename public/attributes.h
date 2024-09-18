@@ -68,12 +68,6 @@
 # define SENTINEL
 #endif /* SENTINEL */
 
-#if GCC_VERSION || __has_attribute(deprecated)
-# define DEPRECATED __attribute__((deprecated))
-#else
-# define DEPRECATED
-#endif /* DEPRECATED */
-
 #if GCC_VERSION >= 2003 || __has_attribute(format)
 # define FORMAT(archetype, string_index, first_to_check) __attribute__((format(archetype, string_index, first_to_check)))
 # define PRINTF(string_index, first_to_check) FORMAT(__printf__, string_index, first_to_check)
