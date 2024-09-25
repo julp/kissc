@@ -44,8 +44,8 @@ void dlist_sort(DList *, CmpFunc);
 
 // LIFO operations
 bool dlist_top(DList *, void **);
+bool dlist_pop(DList *, void **);
 bool dlist_push(DList *, void *, char **);
-bool dlist_top(DList *, void **);
 
 #ifndef WITHOUT_ITERATOR
 # include "iterator.h"

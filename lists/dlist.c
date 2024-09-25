@@ -153,11 +153,11 @@ bool dlist_append(DList *list, void *data, char **error)
         if (NULL != list->tail) {
             list->tail->next = tmp;
             tmp->prev = list->tail;
-            list->tail = tmp;
         } else {
-            list->head = list->tail = tmp;
             tmp->prev = NULL;
+            list->head = tmp;
         }
+        list->tail = tmp;
         ++list->length;
         ok = true;
     } while (false);
@@ -418,6 +418,7 @@ bool dlist_prepend(DList *list, void *data, char **error)
         }
         tmp->prev = NULL;
         if (NULL != list->head) {
+            list->head->prev = tmp;
             tmp->next = list->head;
         } else {
             tmp->next = NULL;
@@ -674,14 +675,16 @@ bool dlist_push(DList *list, void *data, char **error)
  */
 bool dlist_top(DList *list, void **data)
 {
+    bool any;
+
     assert(NULL != list);
     assert(NULL != data);
 
-    if (NULL == list->head) {
+    if ((any = (NULL != list->head))) {
         *data = list->head->data;
     }
 
-    return NULL != list->head;
+    return any;
 }
 /* </stack - LIFO - operations> */
 
